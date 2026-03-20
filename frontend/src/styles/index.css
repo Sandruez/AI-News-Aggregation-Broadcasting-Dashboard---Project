@@ -27,24 +27,24 @@
   }
 
   .btn-primary {
-    @apply bg-pulse-500 hover:bg-pulse-400 text-white font-display font-600 
+    @apply bg-pulse-500 hover:bg-pulse-400 text-white font-display font-semibold 
            px-4 py-2 rounded-lg text-sm transition-all duration-150 
            active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-ghost {
-    @apply bg-transparent hover:bg-ink-700 text-ink-300 hover:text-white 
-           border border-ink-600 hover:border-ink-500
+    @apply bg-transparent hover:bg-ink-700 text-ink-600 hover:text-white 
+           border border-ink-600 hover:border-pulse-500
            px-4 py-2 rounded-lg text-sm transition-all duration-150;
   }
 
   .tag {
     @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs 
-           font-mono bg-ink-700 text-ink-300 border border-ink-600;
+           font-mono bg-ink-700 text-ink-600 border border-ink-600;
   }
 
   .impact-badge {
     @apply inline-flex items-center justify-center w-6 h-6 rounded-md 
-           text-xs font-mono font-500;
+           text-xs font-mono font-medium;
   }
 }

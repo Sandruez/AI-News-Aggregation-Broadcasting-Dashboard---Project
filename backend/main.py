@@ -2,30 +2,51 @@ from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import asyncio
+import logging
 
 from database import init_db
 from routers import news, favorites, broadcast, sources
 from ingestion.scheduler import start_scheduler, stop_scheduler
+from config import get_settings
+
+# Configure logging
+settings = get_settings()
+logging.basicConfig(
+    level=getattr(logging, settings.log_level.upper()),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-    scheduler_task = asyncio.create_task(start_scheduler())
+    if not settings.is_production:
+        scheduler_task = asyncio.create_task(start_scheduler())
     yield
-    scheduler_task.cancel()
+    if not settings.is_production:
+        scheduler_task.cancel()
 
 app = FastAPI(
     title="AI News Dashboard API",
     description="Aggregates, deduplicates, and broadcasts AI news from 20+ sources.",
     version="1.0.0",
     lifespan=lifespan,
+    debug=settings.debug
 )
+
+# Configure CORS for production
+if settings.is_production:
+    allowed_origins = [
+        "https://yourdomain.com",  # Replace with your actual domain
+        "https://www.yourdomain.com",
+    ]
+else:
+    allowed_origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -35,5 +56,6 @@ app.include_router(broadcast.router, prefix="/api/broadcast", tags=["Broadcast"]
 app.include_router(sources.router, prefix="/api/sources", tags=["Sources"])
 
 @app.get("/health")
+@app.get("/api/health")
 async def health():
     return {"status": "ok", "service": "AI News Dashboard"}

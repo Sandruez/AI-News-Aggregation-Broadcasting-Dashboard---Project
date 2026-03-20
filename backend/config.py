@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+import os
 
 class Settings(BaseSettings):
     # Database
@@ -28,9 +29,22 @@ class Settings(BaseSettings):
     fetch_interval_minutes: int = 15
     max_items_per_source: int = 50
 
+    # Production settings
+    environment: str = "development"
+    debug: bool = False
+    log_level: str = "INFO"
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+
+    @property
+    def is_production(self) -> bool:
+        return self.environment.lower() == "production"
+
+    @property
+    def is_development(self) -> bool:
+        return self.environment.lower() == "development"
 
 
 @lru_cache()
