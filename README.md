@@ -4,6 +4,48 @@
 
 ---
 
+## 🚀 Production Deployment
+
+The project includes a complete production-ready Docker setup with:
+
+### **Quick Start**
+```bash
+# 1. Copy production environment template
+cp .env.production .env.local
+
+# 2. Fill in your actual credentials in .env.local
+# - Groq API Key
+# - Database URL
+# - Email/LinkedIn/WhatsApp credentials
+
+# 3. Build and run with Docker Compose
+docker-compose -f docker-compose.prod.yml up -d
+
+# 4. Access the application
+# Frontend: http://localhost:80
+# Backend API: http://localhost:8001
+# Health Check: http://localhost:80/api/health
+```
+
+### **Production Features**
+- ✅ Multi-stage Docker builds for optimized image sizes
+- ✅ Nginx reverse proxy with security headers and gzip compression
+- ✅ Gunicorn WSGI server with production optimizations
+- ✅ PostgreSQL database with health checks
+- ✅ Environment-based configuration
+- ✅ Non-root container execution for security
+- ✅ Comprehensive deployment automation script
+
+### **Detailed Documentation**
+See `DEPLOYMENT.md` for complete deployment guide including:
+- Cloud platform deployment (AWS, GCP, Azure)
+- SSL/HTTPS setup
+- Monitoring and scaling
+- Backup strategies
+- Security checklist
+
+---
+
 ## 🏗️ Architecture
 
 ```
