@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy production requirements
-COPY requirements.prod.txt .
+COPY requirements.prod.txt requirements.prod.txt
 RUN pip install --no-cache-dir -r requirements.prod.txt
 
 # Copy application code
