@@ -1,0 +1,17 @@
+services:
+  # PostgreSQL Database Service
+  - type: pserv
+    name: ai-news-dashboard-db
+    databaseName: ainews
+    user: admin
+    plan: free
+    region: oregon
+    ipAllowList: []  # Only allow internal connections
+    backup:
+      enabled: true
+      retentionDays: 7
+    healthCheck:
+      enabled: true
+      interval: 60
+      timeout: 10
+      retries: 3

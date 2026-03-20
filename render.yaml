@@ -1,0 +1,47 @@
+services:
+  # Backend API Service
+  - type: web
+    name: ai-news-dashboard-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama3-8b-8192
+      - key: LOG_LEVEL
+        value: INFO
+      - key: DEBUG
+        value: false
+
+  # PostgreSQL Database Service
+  - type: pserv
+    name: ai-news-dashboard-db
+    databaseName: ainews
+    user: admin
+    plan: free
+    region: oregon
+    ipAllowList: []  # Only allow internal connections
+
+  # Frontend Static Site Service
+  - type: web
+    name: ai-news-dashboard-frontend
+    env: static
+    buildCommand: cd frontend && npm ci && npm run build
+    buildCommand: cd frontend && npm ci && npm run build
+    publishPath: ./frontend/dist
+    plan: free
+    region: oregon
+    branch: main
+    envVars:
+      - key: VITE_API_URL
+        value: https://ai-news-dashboard-backend.onrender.com

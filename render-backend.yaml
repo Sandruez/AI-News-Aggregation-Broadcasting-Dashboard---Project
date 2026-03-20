@@ -1,0 +1,37 @@
+services:
+  # Backend API Service
+  - type: web
+    name: ai-news-dashboard-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /health
+    healthCheckGracePeriod: 30
+    healthCheckInterval: 15
+    healthCheckTimeout: 10
+    healthCheckRetries: 3
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama3-8b-8192
+      - key: LOG_LEVEL
+        value: INFO
+      - key: DEBUG
+        value: false
+      - key: FETCH_INTERVAL_MINUTES
+        value: "15"
+      - key: MAX_ITEMS_PER_SOURCE
+        value: "50"
+    autoDeploy: true
+    disk:
+      name: ai-news-data
+      sizeGB: 1
+      mountPath: /app/data

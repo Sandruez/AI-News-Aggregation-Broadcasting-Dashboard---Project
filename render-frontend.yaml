@@ -1,0 +1,26 @@
+services:
+  # Frontend Static Site Service
+  - type: web
+    name: ai-news-dashboard-frontend
+    env: static
+    buildCommand: cd frontend && npm ci && npm run build
+    publishPath: ./frontend/dist
+    plan: free
+    region: oregon
+    branch: main
+    envVars:
+      - key: VITE_API_URL
+        value: https://ai-news-dashboard-backend.onrender.com
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-XSS-Protection
+        value: "1; mode=block"
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
