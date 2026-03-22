@@ -9,11 +9,14 @@ from routers import news, favorites, broadcast, sources, admin
 from ingestion.scheduler import start_scheduler, stop_scheduler
 from config import get_settings
 
-# Configure logging - completely disable in production to avoid rate limit
+# Configure logging - balanced for production debugging
 settings = get_settings()
 if settings.is_production:
-    # Completely disable logging in production
-    logging.disable(logging.CRITICAL)
+    # Enable ERROR and WARNING level logging for debugging
+    logging.basicConfig(
+        level=logging.WARNING,
+        format='%(levelname)s - %(message)s'  # Simple format to reduce log volume
+    )
 else:
     logging.basicConfig(
         level=getattr(logging, settings.log_level.upper()),
