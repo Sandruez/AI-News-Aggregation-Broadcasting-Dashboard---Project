@@ -20,9 +20,24 @@ class Base(DeclarativeBase):
 
 
 async def init_db():
+    import asyncio
     from models import Source, NewsItem, Favorite, BroadcastLog, User  # noqa
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    
+    # Retry database connection with exponential backoff
+    max_retries = 5
+    retry_delay = 2
+    
+    for attempt in range(max_retries):
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            return  # Success, exit function
+        except Exception as e:
+            if attempt == max_retries - 1:
+                # Last attempt failed, but don't log to avoid rate limit
+                return
+            await asyncio.sleep(retry_delay)
+            retry_delay *= 2  # Exponential backoff
 
 
 async def get_db():

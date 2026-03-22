@@ -9,10 +9,11 @@ from routers import news, favorites, broadcast, sources, admin
 from ingestion.scheduler import start_scheduler, stop_scheduler
 from config import get_settings
 
-# Configure logging - reduce logging for Railway
+# Configure logging - aggressive reduction for Railway
 settings = get_settings()
 if settings.is_production:
-    logging.basicConfig(level=logging.WARNING)  # Only show warnings and errors in production
+    # Only show critical errors in production to avoid rate limit
+    logging.basicConfig(level=logging.CRITICAL)
 else:
     logging.basicConfig(
         level=getattr(logging, settings.log_level.upper()),
