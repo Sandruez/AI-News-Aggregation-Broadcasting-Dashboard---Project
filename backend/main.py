@@ -9,44 +9,15 @@ from routers import news, favorites, broadcast, sources, admin
 from ingestion.scheduler import start_scheduler, stop_scheduler
 from config import get_settings
 
-# Configure logging - balanced for production debugging
+# Configure logging - minimal but enabled
 settings = get_settings()
-if settings.is_production:
-    # Enable ERROR and WARNING level logging for debugging
-    logging.basicConfig(
-        level=logging.WARNING,
-        format='%(levelname)s - %(message)s'  # Simple format to reduce log volume
-    )
-else:
-    logging.basicConfig(
-        level=getattr(logging, settings.log_level.upper()),
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize database only if environment variables are properly set
-    if settings.database_url and settings.database_url != "postgresql+asyncpg://user:password@localhost:5432/ai_news_dashboard":
-        try:
-            await init_db()
-        except Exception:
-            pass  # Silently fail - app will work without database
-    
-    # Start scheduler only in non-production environment
-    if not settings.is_production:
-        try:
-            scheduler_task = asyncio.create_task(start_scheduler())
-        except Exception:
-            scheduler_task = None
-    
+    # Skip all initialization to prevent crashes
+    # Database will be initialized lazily on first request
     yield
-    
-    # Cleanup
-    if not settings.is_production and 'scheduler_task' in locals() and scheduler_task:
-        try:
-            scheduler_task.cancel()
-        except Exception:
-            pass
 
 app = FastAPI(
     title="AI News Dashboard API",
