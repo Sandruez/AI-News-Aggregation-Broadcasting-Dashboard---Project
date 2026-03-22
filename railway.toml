@@ -3,12 +3,9 @@
 
 [build]
 builder = "DOCKERFILE"
-# Root directory for monorepo
 rootDirectory = "."
 
 [deploy]
-# Using docker-compose for multi-service deployment
-startCommand = "docker-compose -f docker-compose.railway.yml up -d --build"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
@@ -22,7 +19,7 @@ ENVIRONMENT = "production"
 # Frontend Service
 [[services]]
 name = "frontend"
-root = "frontend"
+source = "frontend/"
 build = { dockerfilePath = "frontend/Dockerfile.prod" }
 [services.ports]
 port = 80
@@ -32,11 +29,13 @@ interval = "15s"
 timeout = "10s"
 retries = 3
 gracePeriod = "30s"
+[services.env]
+VITE_API_URL = "${{RAILWAY_PUBLIC_DOMAIN}}"
 
 # Backend Service  
 [[services]]
 name = "backend"
-root = "backend"
+source = "backend/"
 build = { dockerfilePath = "backend/Dockerfile" }
 [services.ports]
 port = 8000
@@ -46,3 +45,7 @@ interval = "15s"
 timeout = "10s"
 retries = 3
 gracePeriod = "30s"
+[services.env]
+DATABASE_URL = "${{RAILWAY_ENVIRONMENT.DATABASE_URL}}"
+GROQ_API_KEY = "${{RAILWAY_ENVIRONMENT.GROQ_API_KEY}}"
+ENVIRONMENT = "production"
