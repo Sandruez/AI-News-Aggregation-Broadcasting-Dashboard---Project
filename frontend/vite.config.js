@@ -6,7 +6,6 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    minify: 'terser',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -14,12 +13,6 @@ export default defineConfig({
           utils: ['axios', 'date-fns', 'clsx'],
           ui: ['lucide-react']
         }
-      }
-    },
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
       }
     }
   },
