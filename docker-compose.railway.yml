@@ -17,8 +17,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    depends_on:
-      - db
 
   frontend:
     build:
@@ -31,23 +29,3 @@ services:
       - backend
     environment:
       - VITE_API_URL=${RAILWAY_PUBLIC_DOMAIN}
-
-  db:
-    image: postgres:15-alpine
-    restart: unless-stopped
-    environment:
-      - POSTGRES_DB=ainews
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  postgres_data:

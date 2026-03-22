@@ -389,28 +389,29 @@ docker-compose -f docker-compose.prod.yml up -d
 # Health Check: http://localhost:80/api/health
 ```
 
-### 🚂 Railway (Recommended)
-**Quick Setup**: Use the provided Railway configuration files
+### 🚂 Railway + Render Database (Recommended)
+**Quick Setup**: Use provided Railway configuration files with external Render database
 - `railway.toml` - Railway service configuration
-- `docker-compose.railway.yml` - Railway Docker setup
+- `docker-compose.railway.yml` - Railway Docker setup (no database)
 - `.env.railway` - Environment variables template
 
 **Steps**:
 1. Connect repository to [Railway](https://railway.app)
-2. Add PostgreSQL service
-3. Set environment variables from `.env.railway`
+2. Set environment variables from `.env.railway`
+3. Use Render PostgreSQL database (external)
 4. Deploy automatically
 
 **Environment Variables Required**:
-- `DATABASE_URL` - PostgreSQL connection string (Railway provides)
+- `DATABASE_URL` - Render PostgreSQL connection string
 - `GROQ_API_KEY` - Groq API key
 - `VITE_API_URL` - Frontend API URL (auto-configured)
 
 **Service URLs**:
 - Frontend: `https://your-app-name.railway.app`
-- Backend: `https://your-backend-name.railway.app`
+- Backend: `https://your-app-name.railway.app/api`
+- Admin Panel: `https://your-app-name.railway.app/admin`
 
-📖 **Full Guide**: See `RAILWAY_DEPLOYMENT.md` for detailed instructions
+📖 **Full Guide**: See `RAILWAY_DEPLOYMENT_RENDER_DB.md` for detailed instructions
 
 ### ⚡ Vercel (Serverless)
 **Frontend**: Static site deployment
