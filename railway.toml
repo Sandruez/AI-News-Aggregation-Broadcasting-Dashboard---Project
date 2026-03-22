@@ -1,0 +1,25 @@
+# Backend Railway Configuration
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "backend/Dockerfile"
+
+[deploy]
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[env]
+ENVIRONMENT = "production"
+PYTHONUNBUFFERED = "1"
+PYTHONDONTWRITEBYTECODE = "1"
+DATABASE_URL = "${{RAILWAY_ENVIRONMENT.DATABASE_URL}}"
+GROQ_API_KEY = "${{RAILWAY_ENVIRONMENT.GROQ_API_KEY}}"
+
+[[services]]
+name = "backend"
+[services.ports]
+port = 8000
+[services.healthChecks]
+path = "/health"
+interval = "15s"
+timeout = "10s"
+retries = 3
