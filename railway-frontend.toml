@@ -9,7 +9,7 @@ restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
 [env]
-VITE_API_URL = "https://ai-news-aggregation-broadcasting-dashboard-pro-production.up.railway.app"
+VITE_API_URL = "https://ai-news-aggregation-broadcasting-dashboard-pro-production.up.railway.app/api"
 
 [[services]]
 name = "frontend"
