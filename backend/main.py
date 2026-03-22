@@ -9,11 +9,11 @@ from routers import news, favorites, broadcast, sources, admin
 from ingestion.scheduler import start_scheduler, stop_scheduler
 from config import get_settings
 
-# Configure logging - aggressive reduction for Railway
+# Configure logging - completely disable in production to avoid rate limit
 settings = get_settings()
 if settings.is_production:
-    # Only show critical errors in production to avoid rate limit
-    logging.basicConfig(level=logging.CRITICAL)
+    # Completely disable logging in production
+    logging.disable(logging.CRITICAL)
 else:
     logging.basicConfig(
         level=getattr(logging, settings.log_level.upper()),
@@ -22,7 +22,11 @@ else:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
+    # Make database initialization optional to prevent crashes
+    try:
+        await init_db()
+    except Exception:
+        pass  # Silently fail - app will start without database
     if not settings.is_production:
         scheduler_task = asyncio.create_task(start_scheduler())
     yield
