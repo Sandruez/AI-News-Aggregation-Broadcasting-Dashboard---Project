@@ -34,7 +34,37 @@ async def root():
 # Mock API endpoints to prevent frontend crashes
 @app.get("/api/news")
 async def get_news():
-    return {"items": [], "total": 0, "page": 1, "limit": 20}
+    return {
+        "items": [
+            {
+                "id": 1,
+                "title": "AI Breakthrough: New Model Achieves Human-Level Performance",
+                "summary": "Researchers announce a groundbreaking AI model that demonstrates human-level reasoning capabilities.",
+                "url": "https://example.com/ai-breakthrough",
+                "source": "TechCrunch",
+                "category": "AI Research",
+                "published_at": "2024-01-15T10:00:00Z",
+                "image_url": "https://example.com/image.jpg",
+                "sentiment": "positive",
+                "relevance_score": 0.95
+            },
+            {
+                "id": 2,
+                "title": "OpenAI Releases New Language Model",
+                "summary": "OpenAI announces the release of their latest language model with improved capabilities.",
+                "url": "https://example.com/openai-release",
+                "source": "The Verge",
+                "category": "Company News",
+                "published_at": "2024-01-14T15:30:00Z",
+                "image_url": "https://example.com/image2.jpg",
+                "sentiment": "neutral",
+                "relevance_score": 0.88
+            }
+        ],
+        "total": 2,
+        "page": 1,
+        "limit": 20
+    }
 
 @app.get("/api/favorites")
 async def get_favorites():
@@ -42,11 +72,21 @@ async def get_favorites():
 
 @app.get("/api/sources")
 async def get_sources():
-    return {"items": []}
+    return {
+        "items": [
+            {"id": 1, "name": "TechCrunch", "url": "https://techcrunch.com", "category": "Technology", "is_active": True},
+            {"id": 2, "name": "The Verge", "url": "https://theverge.com", "category": "Technology", "is_active": True},
+            {"id": 3, "name": "AI News", "url": "https://ai-news.com", "category": "AI", "is_active": True}
+        ]
+    }
 
 @app.get("/api/admin/overview")
 async def get_admin_overview():
-    return {"totalNews": 0, "totalFavorites": 0, "activeSources": 0}
+    return {"totalNews": 150, "totalFavorites": 25, "activeSources": 12}
+
+@app.get("/feed")
+async def get_feed():
+    return {"items": [], "total": 0}
 
 # Log startup
 logging.info("FastAPI app created successfully")
