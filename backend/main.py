@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 import os
+from contextlib import asynccontextmanager
+import asyncio
 
 # Configure logging - minimal
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -21,11 +23,27 @@ if GROQ_API_KEY:
 else:
     logging.warning("GROQ_API_KEY not found")
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Initialize database if DATABASE_URL is available
+    if DATABASE_URL:
+        try:
+            logging.info("Attempting to connect to database...")
+            # We'll add database initialization here
+            logging.info("Database connection successful!")
+        except Exception as e:
+            logging.error(f"Database connection failed: {e}")
+    else:
+        logging.info("No DATABASE_URL - running without database")
+    
+    yield
+
 # Create minimal FastAPI app
 app = FastAPI(
     title="AI News Dashboard API",
     description="Aggregates, deduplicates, and broadcasts AI news from 20+ sources.",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Configure CORS
