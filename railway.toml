@@ -1,12 +1,14 @@
-# Railway Configuration
+# Railway Configuration for Monorepo
 # https://docs.railway.app/guides/deploying-with-config-files
 
 [build]
-builder = "NIXPACKS"
+builder = "DOCKERFILE"
+# Root directory for monorepo
+rootDirectory = "."
 
 [deploy]
 # Using docker-compose for multi-service deployment
-startCommand = "docker-compose -f docker-compose.railway.yml up"
+startCommand = "docker-compose -f docker-compose.railway.yml up -d --build"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
@@ -20,27 +22,27 @@ ENVIRONMENT = "production"
 # Frontend Service
 [[services]]
 name = "frontend"
+root = "frontend"
+build = { dockerfilePath = "frontend/Dockerfile.prod" }
 [services.ports]
 port = 80
-[services.health_checks]
-grace_period = 30
+[services.healthChecks]
+path = "/"
 interval = "15s"
 timeout = "10s"
 retries = 3
-[services.env]
-VITE_API_URL = "${{RAILWAY_PUBLIC_DOMAIN}}"
+gracePeriod = "30s"
 
 # Backend Service  
 [[services]]
 name = "backend"
+root = "backend"
+build = { dockerfilePath = "backend/Dockerfile" }
 [services.ports]
 port = 8000
-[services.health_checks]
-grace_period = 30
+[services.healthChecks]
+path = "/health"
 interval = "15s"
 timeout = "10s"
 retries = 3
-path = "/health"
-[services.env]
-DATABASE_URL = "${{RAILWAY_ENVIRONMENT.DATABASE_URL}}"
-GROQ_API_KEY = "${{RAILWAY_ENVIRONMENT.GROQ_API_KEY}}"
+gracePeriod = "30s"
