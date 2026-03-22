@@ -1,56 +1,35 @@
-from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-import asyncio
 import logging
 
-from database import init_db
-from routers import news, favorites, broadcast, sources, admin
-from ingestion.scheduler import start_scheduler, stop_scheduler
-from config import get_settings
-
-# Configure logging - minimal but enabled
-settings = get_settings()
+# Configure logging - minimal
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Skip all initialization to prevent crashes
-    # Database will be initialized lazily on first request
-    yield
-
+# Create minimal FastAPI app
 app = FastAPI(
     title="AI News Dashboard API",
     description="Aggregates, deduplicates, and broadcasts AI news from 20+ sources.",
-    version="1.0.0",
-    lifespan=lifespan,
-    debug=settings.debug
+    version="1.0.0"
 )
 
-# Configure CORS for production
-if settings.is_production:
-    allowed_origins = [
-        "https://yourdomain.com",  # Replace with your actual domain
-        "https://www.yourdomain.com",
-    ]
-else:
-    allowed_origins = ["*"]
-
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(news.router, prefix="/api/news", tags=["News"])
-app.include_router(favorites.router, prefix="/api/favorites", tags=["Favorites"])
-app.include_router(broadcast.router, prefix="/api/broadcast", tags=["Broadcast"])
-app.include_router(sources.router, prefix="/api/sources", tags=["Sources"])
-app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
-
+# Health check endpoint
 @app.get("/health")
-@app.get("/api/health")
-async def health():
-    return {"status": "ok", "service": "AI News Dashboard"}
+async def health_check():
+    return {"status": "healthy", "message": "API is running"}
+
+# Root endpoint
+@app.get("/")
+async def root():
+    return {"message": "AI News Dashboard API", "version": "1.0.0"}
+
+# Log startup
+logging.info("FastAPI app created successfully")
