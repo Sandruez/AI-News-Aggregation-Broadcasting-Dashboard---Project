@@ -1,21 +1,41 @@
-# Simple Railway Backend Configuration
+# AI News Dashboard Railway Configuration
 [build]
-builder = "NIXPACKS"
+builder = "DOCKERFILE"
 
 [deploy]
-startCommand = "python simple_main.py"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
-healthcheckPath = "/health"
-healthcheckTimeout = 30
+
+# Backend Service
+[[services]]
+name = "backend"
+source = "backend/"
+dockerfilePath = "Dockerfile"
+[services.ports]
+port = 8000
+[services.healthChecks]
+path = "/health"
+interval = "15s"
+timeout = "10s"
+retries = 3
+
+# Frontend Service
+[[services]]
+name = "frontend"
+source = "frontend/"
+dockerfilePath = "Dockerfile.prod"
+[services.ports]
+port = 80
+[services.healthChecks]
+path = "/"
+interval = "15s"
+timeout = "10s"
+retries = 3
 
 [env]
+# Backend Env
 ENVIRONMENT = "production"
 PYTHONUNBUFFERED = "1"
 PYTHONDONTWRITEBYTECODE = "1"
-PORT = "8000"
-
-[[services]]
-name = "backend"
-[services.ports]
-port = 8000
+# Frontend Env
+VITE_API_URL = "https://${RAILWAY_STATIC_URL_BACKEND}/api"
