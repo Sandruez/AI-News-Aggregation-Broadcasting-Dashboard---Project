@@ -4,8 +4,16 @@ builder = "DOCKERFILE"
 dockerfilePath = "backend/Dockerfile"
 
 [deploy]
+startCommand = "uvicorn main:app --host 0.0.0.0 --port 8000"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
+
+[env]
+ENVIRONMENT = "production"
+PYTHONUNBUFFERED = "1"
+PYTHONDONTWRITEBYTECODE = "1"
+GROQ_API_KEY = "${{RAILWAY_ENVIRONMENT.GROQ_API_KEY}}"
+DATABASE_URL = "${{RAILWAY_ENVIRONMENT.DATABASE_URL}}"
 
 [[services]]
 name = "backend"
@@ -16,10 +24,3 @@ path = "/health"
 interval = "15s"
 timeout = "10s"
 retries = 3
-
-[env]
-ENVIRONMENT = "production"
-PYTHONUNBUFFERED = "1"
-PYTHONDONTWRITEBYTECODE = "1"
-GROQ_API_KEY = "${{RAILWAY_ENVIRONMENT.GROQ_API_KEY}}"
-DATABASE_URL = "${{RAILWAY_ENVIRONMENT.DATABASE_URL}}"
