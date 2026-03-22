@@ -28,13 +28,26 @@ async def lifespan(app: FastAPI):
     # Initialize database if DATABASE_URL is available
     if DATABASE_URL:
         try:
-            logging.info("Attempting to connect to database...")
-            # We'll add database initialization here
-            logging.info("Database connection successful!")
+            logging.info("Running database migrations...")
+            
+            # Use existing database setup
+            from database import init_engine, Base
+            from models import Source, NewsItem, Favorite, BroadcastLog, User
+            
+            # Initialize engine
+            init_engine()
+            
+            # Run migrations
+            from database import engine
+            if engine:
+                async with engine.begin() as conn:
+                    await conn.run_sync(Base.metadata.create_all)
+            
+            logging.info("Database migrations completed successfully!")
         except Exception as e:
-            logging.error(f"Database connection failed: {e}")
+            logging.error(f"Database migration failed: {e}")
     else:
-        logging.info("No DATABASE_URL - running without database")
+        logging.info("No database - running without migrations")
     
     yield
 
