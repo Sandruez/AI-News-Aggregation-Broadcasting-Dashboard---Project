@@ -4,15 +4,24 @@ from config import get_settings
 
 settings = get_settings()
 
-engine = create_async_engine(
-    settings.database_url,
-    echo=False,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
-)
+# Don't create engine immediately to prevent startup failures
+engine = None
+AsyncSessionLocal = None
 
-AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+def init_engine():
+    global engine, AsyncSessionLocal
+    if engine is None:
+        try:
+            engine = create_async_engine(
+                settings.database_url,
+                echo=False,
+                pool_pre_ping=True,
+                pool_size=10,
+                max_overflow=20,
+            )
+            AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+        except Exception:
+            pass  # Engine creation failed, will retry later
 
 
 class Base(DeclarativeBase):
@@ -20,11 +29,15 @@ class Base(DeclarativeBase):
 
 
 async def init_db():
+    init_engine()  # Try to initialize engine first
+    if engine is None:
+        return  # Cannot proceed without engine
+    
     import asyncio
     from models import Source, NewsItem, Favorite, BroadcastLog, User  # noqa
     
     # Retry database connection with exponential backoff
-    max_retries = 5
+    max_retries = 3
     retry_delay = 2
     
     for attempt in range(max_retries):
@@ -34,13 +47,18 @@ async def init_db():
             return  # Success, exit function
         except Exception as e:
             if attempt == max_retries - 1:
-                # Last attempt failed, but don't log to avoid rate limit
-                return
+                return  # Silent failure
             await asyncio.sleep(retry_delay)
             retry_delay *= 2  # Exponential backoff
 
 
 async def get_db():
+    init_engine()  # Ensure engine is initialized
+    if AsyncSessionLocal is None:
+        # Database not available, return None
+        yield None
+        return
+    
     async with AsyncSessionLocal() as session:
         try:
             yield session

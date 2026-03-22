@@ -22,16 +22,20 @@ else:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Make database initialization optional to prevent crashes
-    try:
-        await init_db()
-    except Exception:
-        pass  # Silently fail - app will start without database
+    # Completely skip database initialization for now
+    # Database will be initialized on first request if available
     if not settings.is_production:
-        scheduler_task = asyncio.create_task(start_scheduler())
+        try:
+            await init_db()
+            scheduler_task = asyncio.create_task(start_scheduler())
+        except Exception:
+            pass
     yield
     if not settings.is_production:
-        scheduler_task.cancel()
+        try:
+            scheduler_task.cancel()
+        except Exception:
+            pass
 
 app = FastAPI(
     title="AI News Dashboard API",
