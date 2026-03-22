@@ -4,7 +4,7 @@ Admin router for analytics and system monitoring.
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, and_, desc
+from sqlalchemy import select, func, and_, desc, case
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -139,8 +139,8 @@ async def get_broadcast_analytics(db: AsyncSession = Depends(get_db)):
         select(
             BroadcastLog.platform,
             func.count(BroadcastLog.id).label('sent'),
-            func.sum(func.case((BroadcastLog.status == 'sent', 1), else_=0)).label('success'),
-            func.sum(func.case((BroadcastLog.status == 'failed', 1), else_=0)).label('failed')
+            func.sum(case((BroadcastLog.status == 'sent', 1), else_=0)).label('success'),
+            func.sum(case((BroadcastLog.status == 'failed', 1), else_=0)).label('failed')
         )
         .group_by(BroadcastLog.platform)
         .order_by(desc(func.count(BroadcastLog.id)))
@@ -209,7 +209,7 @@ async def get_recent_activity(db: AsyncSession = Depends(get_db)):
     # Get recent broadcasts
     recent_broadcasts = await db.execute(
         select(BroadcastLog)
-        .order_by(desc(BroadcastLog.created_at))
+        .order_by(desc(BroadcastLog.timestamp))
         .limit(3)
     )
     
@@ -217,7 +217,7 @@ async def get_recent_activity(db: AsyncSession = Depends(get_db)):
         activities.append({
             "type": "broadcast",
             "message": f"{broadcast.platform.capitalize()} broadcast {broadcast.status}",
-            "time": format_time_ago(broadcast.created_at),
+            "time": format_time_ago(broadcast.timestamp),
             "status": broadcast.status
         })
     
@@ -244,7 +244,15 @@ async def get_recent_activity(db: AsyncSession = Depends(get_db)):
 
 def format_time_ago(dt: datetime) -> str:
     """Format datetime as 'X time ago'."""
-    now = datetime.utcnow()
+    from datetime import timezone
+    
+    # Ensure both datetimes have the same timezone
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    else:
+        dt = dt.astimezone(timezone.utc)
+    
+    now = datetime.now(timezone.utc)
     diff = now - dt
     
     if diff < timedelta(minutes=1):
