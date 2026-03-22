@@ -59,15 +59,15 @@ async def get_news_trend(
         # Count articles and duplicates for this day
         total_articles = await db.scalar(
             select(func.count(NewsItem.id)).where(
-                and_(NewsItem.created_at >= start_of_day, NewsItem.created_at < end_of_day)
+                and_(NewsItem.ingested_at >= start_of_day, NewsItem.ingested_at < end_of_day)
             )
         )
         
         duplicate_articles = await db.scalar(
             select(func.count(NewsItem.id)).where(
                 and_(
-                    NewsItem.created_at >= start_of_day,
-                    NewsItem.created_at < end_of_day,
+                    NewsItem.ingested_at >= start_of_day,
+                    NewsItem.ingested_at < end_of_day,
                     NewsItem.is_duplicate == True
                 )
             )
@@ -194,7 +194,7 @@ async def get_recent_activity(db: AsyncSession = Depends(get_db)):
     # Get recent news items
     recent_news = await db.execute(
         select(NewsItem)
-        .order_by(desc(NewsItem.created_at))
+        .order_by(desc(NewsItem.ingested_at))
         .limit(5)
     )
     
@@ -202,7 +202,7 @@ async def get_recent_activity(db: AsyncSession = Depends(get_db)):
         activities.append({
             "type": "news",
             "message": f"New article: {item.title[:50]}...",
-            "time": format_time_ago(item.created_at),
+            "time": format_time_ago(item.ingested_at),
             "status": "success"
         })
     
