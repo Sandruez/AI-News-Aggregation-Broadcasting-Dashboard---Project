@@ -389,29 +389,28 @@ docker-compose -f docker-compose.prod.yml up -d
 # Health Check: http://localhost:80/api/health
 ```
 
-### 🌐 Render.com (Recommended)
-**Quick Setup**: Use the provided YAML configuration files
-- `render-backend.yaml` - Backend API service
-- `render-frontend.yaml` - Frontend static site  
-- `render-db.yaml` - PostgreSQL database
+### 🚂 Railway (Recommended)
+**Quick Setup**: Use the provided Railway configuration files
+- `railway.toml` - Railway service configuration
+- `docker-compose.railway.yml` - Railway Docker setup
+- `.env.railway` - Environment variables template
 
 **Steps**:
-1. Fork repository to your GitHub
-2. Go to [Render Dashboard](https://dashboard.render.com)
-3. Click "New +" → "Blueprint"
-4. Connect your GitHub repository
-5. Select the appropriate YAML file
+1. Connect repository to [Railway](https://railway.app)
+2. Add PostgreSQL service
+3. Set environment variables from `.env.railway`
+4. Deploy automatically
 
 **Environment Variables Required**:
-- `DATABASE_URL` - PostgreSQL connection string
+- `DATABASE_URL` - PostgreSQL connection string (Railway provides)
 - `GROQ_API_KEY` - Groq API key
 - `VITE_API_URL` - Frontend API URL (auto-configured)
 
 **Service URLs**:
-- Backend: `https://ai-news-dashboard-backend.onrender.com`
-- Frontend: `https://ai-news-dashboard-frontend.onrender.com`
+- Frontend: `https://your-app-name.railway.app`
+- Backend: `https://your-backend-name.railway.app`
 
-📖 **Full Guide**: See `RENDER_DEPLOYMENT.md` for detailed instructions
+📖 **Full Guide**: See `RAILWAY_DEPLOYMENT.md` for detailed instructions
 
 ### ⚡ Vercel (Serverless)
 **Frontend**: Static site deployment

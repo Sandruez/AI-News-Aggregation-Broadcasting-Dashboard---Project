@@ -1,0 +1,35 @@
+# Railway Configuration
+# https://docs.railway.app/guides/deploying-with-config-files
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "docker-compose -f docker-compose.prod.yml up"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[env]
+NODE_ENV = "production"
+PYTHONUNBUFFERED = "1"
+PYTHONDONTWRITEBYTECODE = "1"
+
+[[services]]
+name = "frontend"
+[services.ports]
+port = 80
+[services.health_checks]
+grace_period = 30
+interval = "15s"
+timeout = "10s"
+retries = 3
+
+[[services]]
+name = "backend"
+[services.ports]
+port = 8000
+[services.health_checks]
+grace_period = 30
+interval = "15s"
+timeout = "10s"
+retries = 3
