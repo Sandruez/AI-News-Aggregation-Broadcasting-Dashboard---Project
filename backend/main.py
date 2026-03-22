@@ -31,5 +31,22 @@ async def health_check():
 async def root():
     return {"message": "AI News Dashboard API", "version": "1.0.0"}
 
+# Mock API endpoints to prevent frontend crashes
+@app.get("/api/news")
+async def get_news():
+    return {"items": [], "total": 0, "page": 1, "limit": 20}
+
+@app.get("/api/favorites")
+async def get_favorites():
+    return {"items": []}
+
+@app.get("/api/sources")
+async def get_sources():
+    return {"items": []}
+
+@app.get("/api/admin/overview")
+async def get_admin_overview():
+    return {"totalNews": 0, "totalFavorites": 0, "activeSources": 0}
+
 # Log startup
 logging.info("FastAPI app created successfully")
