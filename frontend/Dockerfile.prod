@@ -10,8 +10,8 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the application with proper environment
-RUN npm run build
+# Build the application with production config
+RUN npm run build -- --config vite.config.prod.js
 
 # Production stage
 FROM nginx:alpine
