@@ -1,7 +1,8 @@
-# Frontend Railway Configuration - Root Level
+# Frontend Railway Configuration
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile.frontend"
+dockerfilePath = "frontend/Dockerfile.prod"
+dockerContext = "frontend/"
 
 [deploy]
 restartPolicyType = "ON_FAILURE"

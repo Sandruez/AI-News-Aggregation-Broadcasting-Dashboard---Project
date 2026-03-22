@@ -22,16 +22,24 @@ else:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Completely skip database initialization for now
-    # Database will be initialized on first request if available
-    if not settings.is_production:
+    # Initialize database only if environment variables are properly set
+    if settings.database_url and settings.database_url != "postgresql+asyncpg://user:password@localhost:5432/ai_news_dashboard":
         try:
             await init_db()
+        except Exception:
+            pass  # Silently fail - app will work without database
+    
+    # Start scheduler only in non-production environment
+    if not settings.is_production:
+        try:
             scheduler_task = asyncio.create_task(start_scheduler())
         except Exception:
-            pass
+            scheduler_task = None
+    
     yield
-    if not settings.is_production:
+    
+    # Cleanup
+    if not settings.is_production and 'scheduler_task' in locals() and scheduler_task:
         try:
             scheduler_task.cancel()
         except Exception:
