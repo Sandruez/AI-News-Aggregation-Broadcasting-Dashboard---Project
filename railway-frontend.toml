@@ -1,0 +1,22 @@
+# Frontend Railway Configuration
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "frontend/Dockerfile.prod"
+dockerContext = "frontend/"
+
+[deploy]
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[env]
+VITE_API_URL = "https://ai-news-aggregation-broadcasting-dashboard-pro-production.up.railway.app/api"
+
+[[services]]
+name = "frontend"
+[services.ports]
+port = 80
+[services.healthChecks]
+path = "/"
+interval = "15s"
+timeout = "10s"
+retries = 3

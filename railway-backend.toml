@@ -1,0 +1,24 @@
+# Backend Railway Configuration
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "backend/Dockerfile"
+dockerContext = "backend/"
+
+[deploy]
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[env]
+ENVIRONMENT = "production"
+PYTHONUNBUFFERED = "1"
+PYTHONDONTWRITEBYTECODE = "1"
+
+[[services]]
+name = "backend"
+[services.ports]
+port = 8000
+[services.healthChecks]
+path = "/health"
+interval = "15s"
+timeout = "10s"
+retries = 3
