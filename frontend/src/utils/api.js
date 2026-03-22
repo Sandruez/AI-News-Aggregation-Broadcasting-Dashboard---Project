@@ -22,4 +22,13 @@ export const broadcast = (payload) => api.post('/broadcast', payload).then(r => 
 export const fetchSources = () => api.get('/sources').then(r => r.data)
 export const toggleSource = (id) => api.patch(`/sources/${id}/toggle`).then(r => r.data)
 
+// Admin
+export const fetchAdminOverview = () => api.get('/admin/overview').then(r => r.data)
+export const fetchNewsTrend = (days = 7) => api.get('/admin/news-trend', { params: { days } }).then(r => r.data)
+export const fetchSourceDistribution = () => api.get('/admin/source-distribution').then(r => r.data)
+export const fetchCategoryBreakdown = () => api.get('/admin/category-breakdown').then(r => r.data)
+export const fetchBroadcastAnalytics = () => api.get('/admin/broadcast-analytics').then(r => r.data)
+export const fetchSystemHealth = () => api.get('/admin/system-health').then(r => r.data)
+export const fetchRecentActivity = () => api.get('/admin/recent-activity').then(r => r.data)
+
 export default api

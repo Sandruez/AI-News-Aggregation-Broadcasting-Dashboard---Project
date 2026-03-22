@@ -5,7 +5,7 @@ import asyncio
 import logging
 
 from database import init_db
-from routers import news, favorites, broadcast, sources
+from routers import news, favorites, broadcast, sources, admin
 from ingestion.scheduler import start_scheduler, stop_scheduler
 from config import get_settings
 
@@ -54,6 +54,7 @@ app.include_router(news.router, prefix="/api/news", tags=["News"])
 app.include_router(favorites.router, prefix="/api/favorites", tags=["Favorites"])
 app.include_router(broadcast.router, prefix="/api/broadcast", tags=["Broadcast"])
 app.include_router(sources.router, prefix="/api/sources", tags=["Sources"])
+app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 
 @app.get("/health")
 @app.get("/api/health")

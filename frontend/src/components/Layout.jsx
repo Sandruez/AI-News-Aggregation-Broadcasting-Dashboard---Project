@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { Rss, Star, Settings, Zap } from 'lucide-react'
+import { Rss, Star, Settings, Zap, BarChart3 } from 'lucide-react'
 import clsx from 'clsx'
 
 const navItems = [
   { to: '/feed', icon: Rss, label: 'Feed' },
   { to: '/favorites', icon: Star, label: 'Favorites' },
   { to: '/sources', icon: Settings, label: 'Sources' },
+  { to: '/admin', icon: BarChart3, label: 'Admin' },
 ]
 
 export default function Layout({ children }) {
