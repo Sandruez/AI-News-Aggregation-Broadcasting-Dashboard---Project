@@ -9,12 +9,15 @@ from routers import news, favorites, broadcast, sources, admin
 from ingestion.scheduler import start_scheduler, stop_scheduler
 from config import get_settings
 
-# Configure logging
+# Configure logging - reduce logging for Railway
 settings = get_settings()
-logging.basicConfig(
-    level=getattr(logging, settings.log_level.upper()),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+if settings.is_production:
+    logging.basicConfig(level=logging.WARNING)  # Only show warnings and errors in production
+else:
+    logging.basicConfig(
+        level=getattr(logging, settings.log_level.upper()),
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
