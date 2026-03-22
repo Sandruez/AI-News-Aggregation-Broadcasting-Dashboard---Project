@@ -1,17 +1,14 @@
-# Backend Railway Configuration
+# Minimal Backend Railway Configuration
 [build]
-builder = "DOCKERFILE"
-dockerfilePath = "backend/Dockerfile"
-dockerContext = "backend/"
+builder = "NIXPACKS"
 
 [deploy]
+startCommand = "python backend/minimal_main.py"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
 [env]
-ENVIRONMENT = "production"
-PYTHONUNBUFFERED = "1"
-PYTHONDONTWRITEBYTECODE = "1"
+PORT = "8000"
 
 [[services]]
 name = "backend"

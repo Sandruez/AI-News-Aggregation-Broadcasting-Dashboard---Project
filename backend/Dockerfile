@@ -25,4 +25,4 @@ USER app
 EXPOSE 8000
 
 # Simple startup command
-CMD ["python", "simple_main.py"]
+CMD ["python", "minimal_main.py"]
