@@ -1,9 +1,25 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
+import os
 
 # Configure logging - minimal
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+
+# Database URL from environment
+DATABASE_URL = os.getenv("DATABASE_URL")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+# Log if environment variables are set
+if DATABASE_URL:
+    logging.info("DATABASE_URL found")
+else:
+    logging.warning("DATABASE_URL not found")
+
+if GROQ_API_KEY:
+    logging.info("GROQ_API_KEY found")
+else:
+    logging.warning("GROQ_API_KEY not found")
 
 # Create minimal FastAPI app
 app = FastAPI(
