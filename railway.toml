@@ -1,0 +1,21 @@
+# Simple Railway Backend Configuration
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "python simple_main.py"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+
+[env]
+ENVIRONMENT = "production"
+PYTHONUNBUFFERED = "1"
+PYTHONDONTWRITEBYTECODE = "1"
+PORT = "8000"
+
+[[services]]
+name = "backend"
+[services.ports]
+port = 8000
