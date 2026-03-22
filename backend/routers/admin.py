@@ -28,7 +28,8 @@ async def get_admin_overview(db: AsyncSession = Depends(get_db)):
     # Recent activity (last 24 hours)
     yesterday = now - timedelta(days=1)
     recent_news = await db.scalar(
-        select(func.count(NewsItem.id)).where(NewsItem.created_at >= yesterday)
+        select(func.count(NewsItem.id))
+        .where(NewsItem.ingested_at >= yesterday)
     )
     
     return {
