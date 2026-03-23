@@ -1,8 +1,10 @@
 import os
+import logging
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from config import get_settings
 
+logger = logging.getLogger(__name__)
 settings = get_settings()
 
 def get_db_url():
@@ -57,25 +59,31 @@ class Base(DeclarativeBase):
 async def init_db():
     init_engine()  # Try to initialize engine first
     if engine is None:
-        return  # Cannot proceed without engine
+        logger.error("Cannot initialize DB: Engine is None")
+        return
     
     import asyncio
     from models import Source, NewsItem, Favorite, BroadcastLog, User  # noqa
     
     # Retry database connection with exponential backoff
-    max_retries = 3
+    max_retries = 5
     retry_delay = 2
     
+    logger.info("Starting database table creation (if not exists)...")
     for attempt in range(max_retries):
         try:
             async with engine.begin() as conn:
+                # This is safe to run even if tables exist (it uses IF NOT EXISTS)
                 await conn.run_sync(Base.metadata.create_all)
-            return  # Success, exit function
+            logger.info("Database tables verified/created successfully")
+            return
         except Exception as e:
+            logger.warning(f"Database connection attempt {attempt + 1} failed: {e}")
             if attempt == max_retries - 1:
-                return  # Silent failure
+                logger.error("Max retries reached. Database initialization failed.")
+                return
             await asyncio.sleep(retry_delay)
-            retry_delay *= 2  # Exponential backoff
+            retry_delay *= 2
 
 
 async def get_db():
