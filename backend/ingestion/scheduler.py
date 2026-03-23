@@ -26,15 +26,15 @@ async def seed_sources():
     """Ensure all sources from registry exist in DB."""
     logger.info("Starting to seed sources...")
     
-    # Ensure database is initialized
-    from database import init_engine
-    init_engine()
+    # Import and initialize database
+    import database
+    engine = database.init_engine()
     
-    db = SessionLocal()
-    if db is None:
+    if engine is None:
         logger.error("Database not initialized - cannot seed sources")
         return
         
+    db = database.SessionLocal()
     try:
         sources_added = 0
         for sc in ALL_SOURCES:
@@ -65,15 +65,15 @@ async def run_ingestion():
     logger.info("Starting ingestion run at %s", datetime.now(tz=timezone.utc).isoformat())
     await seed_sources()
 
-    # Ensure database is initialized
-    from database import init_engine
-    init_engine()
+    # Import and initialize database
+    import database
+    engine = database.init_engine()
     
-    db = SessionLocal()
-    if db is None:
+    if engine is None:
         logger.error("Database not initialized - cannot run ingestion")
         return
         
+    db = database.SessionLocal()
     try:
         sources_result = db.execute(select(Source).where(Source.active == True))
         sources = sources_result.scalars().all()
