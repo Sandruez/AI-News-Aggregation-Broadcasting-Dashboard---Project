@@ -97,7 +97,7 @@ async def get_news(
     q: Optional[str] = None, 
     source_id: Optional[int] = None, 
     category: Optional[str] = None,
-    db: AsyncSession = Depends(get_db)
+    db: Session = Depends(get_db)
 ):
     """Get paginated news items with filtering and search"""
     try:
@@ -211,13 +211,13 @@ async def refresh_news(db = Depends(get_db)):
 
 # Favorites endpoints
 @app.get("/api/favorites")
-async def get_favorites(db: AsyncSession = Depends(get_db)):
+async def get_favorites(db: Session = Depends(get_db)):
     """Get user favorites"""
     try:
         if db is None:
             return {"items": []}
         
-        result = await db.execute(
+        result = db.execute(
             select(Favorite).options(selectinload(Favorite.news_item).selectinload(NewsItem.source))
         )
         favorites = result.scalars().all()
@@ -249,21 +249,21 @@ async def get_favorites(db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Failed to fetch favorites")
 
 @app.post("/api/favorites/{news_item_id}")
-async def add_favorite(news_item_id: int, db: AsyncSession = Depends(get_db)):
+async def add_favorite(news_item_id: int, db: Session = Depends(get_db)):
     """Add item to favorites"""
     try:
         if db is None:
             raise HTTPException(status_code=500, detail="Database not available")
         
         # Check if news item exists
-        news_result = await db.execute(select(NewsItem).where(NewsItem.id == news_item_id))
+        news_result = db.execute(select(NewsItem).where(NewsItem.id == news_item_id))
         news_item = news_result.scalar_one_or_none()
         
         if not news_item:
             raise HTTPException(status_code=404, detail="News item not found")
         
         # Check if already favorited
-        existing = await db.execute(
+        existing = db.execute(
             select(Favorite).where(Favorite.news_item_id == news_item_id)
         )
         if existing.scalar_one_or_none():
@@ -272,7 +272,7 @@ async def add_favorite(news_item_id: int, db: AsyncSession = Depends(get_db)):
         # Add favorite
         favorite = Favorite(news_item_id=news_item_id)
         db.add(favorite)
-        await db.commit()
+        db.commit()
         
         return {"id": favorite.id, "news_item_id": news_item_id, "created_at": favorite.created_at.isoformat()}
             
@@ -283,13 +283,13 @@ async def add_favorite(news_item_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Failed to add favorite")
 
 @app.delete("/api/favorites/{news_item_id}")
-async def remove_favorite(news_item_id: int, db: AsyncSession = Depends(get_db)):
+async def remove_favorite(news_item_id: int, db: Session = Depends(get_db)):
     """Remove item from favorites"""
     try:
         if db is None:
             raise HTTPException(status_code=500, detail="Database not available")
         
-        result = await db.execute(
+        result = db.execute(
             select(Favorite).where(Favorite.news_item_id == news_item_id)
         )
         favorite = result.scalar_one_or_none()
@@ -297,8 +297,8 @@ async def remove_favorite(news_item_id: int, db: AsyncSession = Depends(get_db))
         if not favorite:
             raise HTTPException(status_code=404, detail="Favorite not found")
         
-        await db.delete(favorite)
-        await db.commit()
+        db.delete(favorite)
+        db.commit()
         
         return {"message": "Favorite removed", "status": "success"}
             
@@ -340,20 +340,20 @@ def get_sources(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Failed to fetch sources")
 
 @app.patch("/api/sources/{id}/toggle")
-async def toggle_source(id: int, db: AsyncSession = Depends(get_db)):
+async def toggle_source(id: int, db: Session = Depends(get_db)):
     """Toggle source active status"""
     try:
         if db is None:
             raise HTTPException(status_code=500, detail="Database not available")
         
-        result = await db.execute(select(Source).where(Source.id == id))
+        result = db.execute(select(Source).where(Source.id == id))
         source = result.scalar_one_or_none()
         
         if not source:
             raise HTTPException(status_code=404, detail="Source not found")
         
         source.active = not source.active
-        await db.commit()
+        db.commit()
         
         return {"id": id, "is_active": source.active, "active": source.active, "message": "Source toggled"}
             
@@ -365,7 +365,7 @@ async def toggle_source(id: int, db: AsyncSession = Depends(get_db)):
 
 # Admin endpoints
 @app.get("/api/admin/overview")
-async def get_admin_overview(db: AsyncSession = Depends(get_db)):
+async def get_admin_overview(db: Session = Depends(get_db)):
     """Get admin dashboard overview"""
     try:
         if db is None:
@@ -388,7 +388,7 @@ async def get_admin_overview(db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Failed to fetch admin overview")
 
 @app.post("/api/broadcast")
-async def broadcast_news(payload: Dict[str, Any], db: AsyncSession = Depends(get_db)):
+async def broadcast_news(payload: Dict[str, Any], db: Session = Depends(get_db)):
     """Broadcast news to platforms"""
     try:
         if db is None:
@@ -406,7 +406,7 @@ async def broadcast_news(payload: Dict[str, Any], db: AsyncSession = Depends(get
         )
         
         db.add(broadcast_log)
-        await db.commit()
+        db.commit()
         
         return {"message": "Broadcast sent", "status": "success", "payload": payload}
         
@@ -416,7 +416,7 @@ async def broadcast_news(payload: Dict[str, Any], db: AsyncSession = Depends(get
 
 # Additional admin endpoints for frontend
 @app.get("/api/admin/news-trend")
-async def get_news_trend(days: int = 7, db: AsyncSession = Depends(get_db)):
+async def get_news_trend(days: int = 7, db: Session = Depends(get_db)):
     """Get news trend data for admin dashboard"""
     try:
         if db is None:
@@ -440,7 +440,7 @@ async def get_news_trend(days: int = 7, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Failed to fetch news trend")
 
 @app.get("/api/admin/source-distribution")
-async def get_source_distribution(db: AsyncSession = Depends(get_db)):
+async def get_source_distribution(db: Session = Depends(get_db)):
     """Get source distribution data for admin dashboard"""
     try:
         if db is None:
@@ -462,7 +462,7 @@ async def get_source_distribution(db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Failed to fetch source distribution")
 
 @app.get("/api/admin/category-breakdown")
-async def get_category_breakdown(db: AsyncSession = Depends(get_db)):
+async def get_category_breakdown(db: Session = Depends(get_db)):
     """Get category breakdown data for admin dashboard"""
     try:
         if db is None:
@@ -484,7 +484,7 @@ async def get_category_breakdown(db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Failed to fetch category breakdown")
 
 @app.get("/api/admin/broadcast-analytics")
-async def get_broadcast_analytics(db: AsyncSession = Depends(get_db)):
+async def get_broadcast_analytics(db: Session = Depends(get_db)):
     """Get broadcast analytics data for admin dashboard"""
     try:
         if db is None:
@@ -511,7 +511,7 @@ async def get_broadcast_analytics(db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Failed to fetch broadcast analytics")
 
 @app.get("/api/admin/system-health")
-async def get_system_health(db: AsyncSession = Depends(get_db)):
+async def get_system_health(db: Session = Depends(get_db)):
     """Get system health data for admin dashboard"""
     try:
         # Health check data
@@ -532,7 +532,7 @@ async def get_system_health(db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Failed to fetch system health")
 
 @app.get("/api/admin/recent-activity")
-async def get_recent_activity(db: AsyncSession = Depends(get_db)):
+async def get_recent_activity(db: Session = Depends(get_db)):
     """Get recent activity data for admin dashboard"""
     try:
         if db is None:
@@ -554,13 +554,13 @@ async def get_recent_activity(db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Failed to fetch recent activity")
 
 @app.get("/feed")
-async def get_feed(db: AsyncSession = Depends(get_db)):
+async def get_feed(db: Session = Depends(get_db)):
     """RSS feed endpoint"""
     try:
         if db is None:
             return {"items": [], "total": 0}
         
-        result = await db.execute(
+        result = db.execute(
             select(NewsItem).options(selectinload(NewsItem.source))
             .order_by(NewsItem.published_at.desc())
             .limit(20)
@@ -589,12 +589,13 @@ async def get_feed(db: AsyncSession = Depends(get_db)):
 async def insert_sample_data():
     """Insert sample data if database is empty"""
     try:
-        async for db in get_db():
-            if db is None:
-                return
-            
+        db = next(get_db())
+        if db is None:
+            return
+        
+        try:
             # Check if sources exist
-            sources_result = await db.execute(select(Source).limit(1))
+            sources_result = db.execute(select(Source).limit(1))
             source_exists = sources_result.scalar_one_or_none() is not None
             
             if not source_exists:
@@ -604,14 +605,6 @@ async def insert_sample_data():
                         name="TechCrunch", 
                         url="https://techcrunch.com", 
                         feed_url="https://techcrunch.com/feed/",
-                        category="Technology", 
-                        active=True,
-                        source_type="rss"
-                    ),
-                    Source(
-                        name="The Verge", 
-                        url="https://theverge.com", 
-                        feed_url="https://www.theverge.com/rss/index.xml",
                         category="Technology", 
                         active=True,
                         source_type="rss"
@@ -627,7 +620,7 @@ async def insert_sample_data():
                 ]
                 
                 db.add_all(sample_sources)
-                await db.commit()
+                db.commit()
                 logger.info("Sample sources inserted")
                 
                 # Insert sample news items
@@ -640,11 +633,11 @@ async def insert_sample_data():
                         category="AI Research",
                         published_at=datetime.utcnow(),
                         sentiment="positive",
-                        relevance_score=0.95
+                        relevance_score=0.92
                     ),
                     NewsItem(
-                        title="OpenAI Releases New Language Model",
-                        summary="OpenAI announces the release of their latest language model with improved capabilities and better performance.",
+                        title="OpenAI Announces Major Update to GPT Models",
+                        summary="OpenAI releases significant improvements to their language models, offering better performance and reduced costs.",
                         url="https://example.com/openai-release",
                         source_id=2,
                         category="Company News",
@@ -655,8 +648,11 @@ async def insert_sample_data():
                 ]
                 
                 db.add_all(news_items)
-                await db.commit()
+                db.commit()
                 logger.info("Sample news items inserted")
+                
+        finally:
+            db.close()
                 
     except Exception as e:
         logger.error(f"Failed to insert sample data: {e}")
