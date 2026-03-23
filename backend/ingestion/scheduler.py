@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select, func
 
 from config import get_settings
-from database import AsyncSessionLocal
+from database import SessionLocal
 from models import Source, NewsItem
 from schemas import NewsItemCreate
 from ingestion.sources_registry import ALL_SOURCES
@@ -24,9 +24,10 @@ settings = get_settings()
 
 async def seed_sources():
     """Ensure all sources from registry exist in DB."""
-    async with AsyncSessionLocal() as db:
+    db = SessionLocal()
+    try:
         for sc in ALL_SOURCES:
-            existing = await db.execute(select(Source).where(Source.url == sc.url))
+            existing = db.execute(select(Source).where(Source.url == sc.url))
             if not existing.scalar_one_or_none():
                 db.add(Source(
                     name=sc.name,
@@ -36,19 +37,25 @@ async def seed_sources():
                     category=sc.category,
                     active=sc.active,
                 ))
-        await db.commit()
+        db.commit()
+    except Exception as e:
+        logger.error(f"Error seeding sources: {e}")
+        db.rollback()
+    finally:
+        db.close()
 
 
 async def run_ingestion():
     logger.info("Starting ingestion run at %s", datetime.now(tz=timezone.utc).isoformat())
     await seed_sources()
 
-    async with AsyncSessionLocal() as db:
-        sources_result = await db.execute(select(Source).where(Source.active == True))
+    db = SessionLocal()
+    try:
+        sources_result = db.execute(select(Source).where(Source.active == True))
         sources = sources_result.scalars().all()
 
         # Load recent hashes and titles for dedup
-        recent_items = await db.execute(
+        recent_items = db.execute(
             select(NewsItem.content_hash, NewsItem.title)
             .order_by(NewsItem.ingested_at.desc())
             .limit(500)
@@ -74,7 +81,7 @@ async def run_ingestion():
 
                 for item in items:
                     # Check URL uniqueness first
-                    url_exists = await db.execute(
+                    url_exists = db.execute(
                         select(NewsItem).where(NewsItem.url == item.url)
                     )
                     if url_exists.scalar_one_or_none():
@@ -113,12 +120,15 @@ async def run_ingestion():
                     existing_titles = existing_titles[:500]
                     new_count += 1
 
-                await db.commit()
+                db.commit()
 
             except Exception as exc:
                 logger.error("Ingestion error for source %s: %s", source.name, exc)
-                await db.rollback()
+                db.rollback()
 
+    finally:
+        db.close()
+        
     logger.info("Ingestion complete. Added %d new items.", new_count)
 
 
