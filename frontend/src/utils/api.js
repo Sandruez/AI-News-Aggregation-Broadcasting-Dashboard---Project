@@ -1,8 +1,14 @@
 import axios from 'axios'
 
-// Production-ready API configuration - requires VITE_API_URL to be set
+// Production-ready API configuration with fallback
+const apiUrl = import.meta.env.VITE_API_URL
+
+if (!apiUrl) {
+  console.error('VITE_API_URL is not defined! Set it in Railway dashboard.')
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: apiUrl || '/api', // Fallback to relative path if env var not set
   timeout: 15000,
 })
 
