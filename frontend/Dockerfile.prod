@@ -18,13 +18,8 @@ FROM caddy:alpine
 # Copy built app
 COPY --from=builder /app/dist /srv
 
-# Create a simple Caddyfile that works with Railway
-RUN echo ':80 {
-    root * /srv
-    file_server
-    try_files {path} {path}/ /index.html
-    encode zstd gzip
-}' > /etc/caddy/Caddyfile
+# Create a simple Caddyfile that works with Railway - using proper escaping
+RUN printf ':80 {\n    root * /srv\n    file_server\n    try_files {path} {path}/ /index.html\n    encode zstd gzip\n}\n' > /etc/caddy/Caddyfile
 
 # Start Caddy - Railway automatically sets the PORT
 CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--listen", ":80"]
