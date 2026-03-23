@@ -19,7 +19,7 @@ FROM caddy:alpine
 COPY --from=builder /app/dist /srv
 
 # Create Caddyfile for SPA support
-RUN printf ':${PORT:-80} {\n    root * /srv\n    file_server\n    try_files {path} {path}/ /index.html\n    encode zstd gzip\n}\n' > /etc/caddy/Caddyfile
+RUN printf ':80 {\n    root * /srv\n    file_server\n    try_files {path} {path}/ /index.html\n    encode zstd gzip\n}\n' > /etc/caddy/Caddyfile
 
-# Start Caddy
-CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
+# Start Caddy with port from environment
+CMD ["sh", "-c", "caddy run --config /etc/caddy/Caddyfile --listen :${PORT:-80}"]
