@@ -1,4 +1,4 @@
-FROM node:18-alpine AS builder
+FROM node:18-alpine
 
 WORKDIR /app
 
@@ -12,17 +12,6 @@ COPY . .
 # Build application
 RUN npm run build
 
-# Production stage - use nginx
-FROM nginx:alpine
-
-# Copy built app to nginx
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose port
+# Start with Vite preview
 EXPOSE 80
-
-# Start nginx with dynamic PORT - patch config at runtime
-CMD ["sh", "-c", "sed -i 's/listen 80;/listen ${PORT:-80};/g' /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
+CMD ["sh", "-c", "npm run start"]

@@ -1,6 +1,7 @@
-# Frontend Service - React/Vite
+# Frontend Service - React/Vite with proper Docker
 [build]
-builder = "NIXPACKS"
+builder = "DOCKERFILE"
+dockerfilePath = "frontend/Dockerfile"
 
 [env]
 VITE_API_URL = "${{services.BACKEND.url}}/api"
