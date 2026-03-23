@@ -1,7 +1,8 @@
 import axios from 'axios'
 
+// Production-ready API configuration - requires VITE_API_URL to be set
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api',
+  baseURL: import.meta.env.VITE_API_URL,
   timeout: 15000,
 })
 

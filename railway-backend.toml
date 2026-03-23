@@ -12,7 +12,6 @@ restartPolicyMaxRetries = 10
 ENVIRONMENT = "production"
 PYTHONUNBUFFERED = "1"
 PYTHONDONTWRITEBYTECODE = "1"
-PORT = "8000"
 # Database
 DATABASE_URL = "${{RAILWAY_ENVIRONMENT.DATABASE_URL}}"
 # Groq AI
@@ -29,8 +28,6 @@ LINKEDIN_ACCESS_TOKEN = "${{RAILWAY_ENVIRONMENT.LINKEDIN_ACCESS_TOKEN}}"
 
 [[services]]
 name = "backend"
-[services.ports]
-port = 8000
 [services.healthChecks]
 path = "/health"
 interval = "15s"
