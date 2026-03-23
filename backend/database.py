@@ -98,8 +98,9 @@ def get_db():
     """Get database session"""
     init_engine()  # Ensure engine is initialized
     if SessionLocal is None:
-        # Database not available, return None
-        return None
+        # Database not available, yield None
+        yield None
+        return
     
     db = SessionLocal()
     try:
