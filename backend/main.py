@@ -456,16 +456,28 @@ async def get_source_distribution(db: Session = Depends(get_db)):
         if db is None:
             return {"distribution": []}
         
-        # Simple mock data for now
-        return {
-            "distribution": [
-                {"source": "TechCrunch", "count": 45},
-                {"source": "The Verge", "count": 32},
-                {"source": "AI News", "count": 28},
-                {"source": "Wired", "count": 15},
-                {"source": "MIT Review", "count": 12}
-            ]
-        }
+        # Query real data from database
+        result = db.execute(
+            select(Source.name, func.count(NewsItem.id).label('count'))
+            .join(NewsItem, Source.id == NewsItem.source_id, isouter=True)
+            .group_by(Source.name)
+            .order_by(func.count(NewsItem.id).desc())
+        )
+        
+        distribution = []
+        for row in result:
+            distribution.append({
+                "source": row.name,
+                "count": row.count or 0
+            })
+        
+        # If no data, return sample sources with 0 counts
+        if not distribution:
+            sources_result = db.execute(select(Source).order_by(Source.name))
+            sources = sources_result.scalars().all()
+            distribution = [{"source": source.name, "count": 0} for source in sources]
+        
+        return {"distribution": distribution}
             
     except Exception as e:
         logger.error(f"Error fetching source distribution: {e}")
@@ -478,16 +490,26 @@ async def get_category_breakdown(db: Session = Depends(get_db)):
         if db is None:
             return {"categories": []}
         
-        # Simple mock data for now
-        return {
-            "categories": [
-                {"category": "AI Research", "count": 38},
-                {"category": "Company News", "count": 25},
-                {"category": "Technology", "count": 42},
-                {"category": "Business", "count": 18},
-                {"category": "Science", "count": 15}
-            ]
-        }
+        # Query real data from database
+        result = db.execute(
+            select(NewsItem.category, func.count(NewsItem.id).label('count'))
+            .where(NewsItem.category.isnot(None))
+            .group_by(NewsItem.category)
+            .order_by(func.count(NewsItem.id).desc())
+        )
+        
+        categories = []
+        for row in result:
+            categories.append({
+                "category": row.category,
+                "count": row.count
+            })
+        
+        # If no data, return empty array
+        if not categories:
+            categories = []
+        
+        return {"categories": categories}
             
     except Exception as e:
         logger.error(f"Error fetching category breakdown: {e}")

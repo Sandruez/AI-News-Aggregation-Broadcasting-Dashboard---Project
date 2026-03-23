@@ -38,11 +38,11 @@ export default function AdminPage() {
       setStats({
         overview,
         newsTrend,
-        sourceDistribution: sourceDist.map((item, index) => ({
+        sourceDistribution: (sourceDist?.distribution || sourceDist || []).map((item, index) => ({
           ...item,
           color: COLORS[index % COLORS.length]
         })),
-        categoryBreakdown: categories,
+        categoryBreakdown: categories?.categories || categories || [],
         broadcastAnalytics: broadcasts,
         systemHealth: health,
         recentActivity: activity
