@@ -36,11 +36,10 @@ def init_engine():
         return None
     
     try:
-        # Create engine with psycopg settings
+        # Create engine with psycopg settings - no pre_ping to avoid greenlet issues
         engine = create_async_engine(
             db_url,
             echo=settings.debug,
-            pool_pre_ping=True,
             pool_recycle=300,
             connect_args={
                 "sslmode": "require",
