@@ -1,36 +1,15 @@
-# Production Backend Railway Configuration
+# Backend Service - FastAPI
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "backend/Dockerfile"
-dockerContext = "backend/"
 
 [deploy]
-startCommand = "sh -c 'uvicorn main:app --host 0.0.0.0 --port $PORT'"
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
+startCommand = "uvicorn main:app --host 0.0.0.0 --port $PORT"
 
 [env]
-ENVIRONMENT = "production"
 PYTHONUNBUFFERED = "1"
-PYTHONDONTWRITEBYTECODE = "1"
-# Database
-DATABASE_URL = "${{RAILWAY_ENVIRONMENT.DATABASE_URL}}"
-# Groq AI
-GROQ_API_KEY = "${{RAILWAY_ENVIRONMENT.GROQ_API_KEY}}"
-GROQ_MODEL = "llama3-8b-8192"
-# Email broadcasting
-SMTP_HOST = "smtp.gmail.com"
-SMTP_PORT = "587"
-SMTP_USER = "${{RAILWAY_ENVIRONMENT.SMTP_USER}}"
-SMTP_PASSWORD = "${{RAILWAY_ENVIRONMENT.SMTP_PASSWORD}}"
-SMTP_FROM = "${{RAILWAY_ENVIRONMENT.SMTP_FROM}}"
-# LinkedIn
-LINKEDIN_ACCESS_TOKEN = "${{RAILWAY_ENVIRONMENT.LINKEDIN_ACCESS_TOKEN}}"
 
 [[services]]
 name = "backend"
 [services.healthChecks]
 path = "/health"
-interval = "15s"
-timeout = "10s"
-retries = 3

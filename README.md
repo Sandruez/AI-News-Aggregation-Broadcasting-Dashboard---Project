@@ -1,53 +1,41 @@
-# 🧠 Pulse — AI News Aggregation & Broadcasting Dashboard
+# AI News Dashboard
 
+## Railway Deployment Setup
 
+### Services
+- **backend**: FastAPI application  
+- **frontend**: React/Vite application
 
-> Aggregates AI news from 20+ sources, deduplicates with Groq LLM, displays in a clean dashboard, and lets you broadcast stories via Email, LinkedIn, WhatsApp, Blog, and Newsletter.
+### Environment Variables
 
+#### Backend
+- `DATABASE_URL`: PostgreSQL connection string
+- `GROQ_API_KEY`: Groq AI API key  
+- `SMTP_USER`: Email username
+- `SMTP_PASSWORD`: Email password
+- `SMTP_FROM`: Email from address
+
+#### Frontend  
+- `VITE_API_URL`: Backend API URL (auto-configured)
+
+### Architecture
+```
+RSS Feeds → News Aggregator → PostgreSQL → FastAPI → React Frontend
+                                    ↓
+                              Email Broadcasting
+```
+
+### Features
+- AI-powered news analysis (Groq)
+- RSS feed aggregation
+- Email broadcasting
+- Real-time updates
+- Admin dashboard
 
 
 ---
 
-
-
-## 🏗️ Architecture
-
-
-
-```
-
-[20+ RSS / APIs / HN / arXiv]
-
-          ↓
-
-   [Fetcher Workers]          runs every 15 min (configurable)
-
-          ↓
-
- [Normaliser & Deduplicator]  hash → Jaccard → Groq semantic check
-
-          ↓
-
-    [PostgreSQL DB]           sources / news_items / favorites / broadcast_logs
-
-          ↓
-
-   [FastAPI Backend]          REST API — /api/news, /favorites, /broadcast, /sources
-
-          ↓
-
-  [React Frontend]            Feed tab · Favorites tab · Sources admin
-
-          ↓
-
- [Groq-Powered Broadcast]     Email (SMTP) · LinkedIn · WhatsApp · Blog · Newsletter
-
-```
-
-
-
----
-
+## Quick Start (Docker)
 
 
 ## ⚡ Quick Start (Docker)
