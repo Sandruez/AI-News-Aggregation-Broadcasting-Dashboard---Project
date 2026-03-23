@@ -27,7 +27,7 @@ api.interceptors.response.use(
 
 // All endpoints already start with /api/...
 // Feed
-export const fetchFeed = () => api.get('api/feed').then(r => r.data)
+export const fetchFeed = () => api.get('/api/feed').then(r => r.data)
 
 // News
 export const fetchNews = (params) => api.get('/api/news', { params }).then(r => r.data)
