@@ -19,4 +19,9 @@ FROM caddy:alpine
 COPY --from=builder /app/dist /srv
 
 # Start Caddy using shell form to allow environment variable substitution
-CMD ["sh", "-c", "echo ':\${PORT:-80} {\n    root * /srv\n    file_server\n    try_files {path} {path}/ /index.html\n    encode zstd gzip\n}' > /etc/caddy/Caddyfile && caddy run --config /etc/caddy/Caddyfile"]
+CMD sh -c 'echo ":${PORT:-80} {
+    root * /srv
+    file_server
+    try_files {path} {path}/ /index.html
+    encode zstd gzip
+}" > /etc/caddy/Caddyfile && caddy run --config /etc/caddy/Caddyfile'
