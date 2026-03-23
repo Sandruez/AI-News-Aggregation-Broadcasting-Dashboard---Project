@@ -326,10 +326,10 @@ def get_sources(db: Session = Depends(get_db)):
                     "name": source.name,
                     "url": source.url,
                     "feed_url": source.feed_url,
-                    "type": source.type,
+                    "type": source.source_type,
                     "category": source.category,
-                    "active": source.is_active,
-                    "is_active": source.is_active
+                    "active": source.active,
+                    "is_active": source.active
                 } for source in sources
             ],
             "total": len(sources)
@@ -371,10 +371,10 @@ async def get_admin_overview(db: Session = Depends(get_db)):
         if db is None:
             return {"totalNews": 0, "totalFavorites": 0, "activeSources": 0}
         
-        news_count = await db.scalar(select(func.count(NewsItem.id)))
-        favorites_count = await db.scalar(select(func.count(Favorite.id)))
-        sources_count = await db.scalar(select(func.count(Source.id)))
-        active_sources_count = await db.scalar(select(func.count(Source.id)).where(Source.active == True))
+        news_count = db.scalar(select(func.count(NewsItem.id)))
+        favorites_count = db.scalar(select(func.count(Favorite.id)))
+        sources_count = db.scalar(select(func.count(Source.id)))
+        active_sources_count = db.scalar(select(func.count(Source.id)).where(Source.active == True))
         
         return {
             "totalNews": news_count,
