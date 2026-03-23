@@ -649,8 +649,8 @@ async def get_recent_activity(db: Session = Depends(get_db)):
         for item in recent_news.scalars().all():
             activities.append({
                 "type": "news",
-                "title": item.title[:50] + "..." if len(item.title) > 50 else item.title,
-                "description": f"New article: {item.title}",
+                "title": item.title[:50] + '...' if len(item.title) > 50 else item.title,
+                "description": f'New article: {item.title}',
                 "timestamp": item.published_at.isoformat() if item.published_at else None,
                 "source": item.source.name if item.source else "Unknown"
             })
@@ -659,8 +659,8 @@ async def get_recent_activity(db: Session = Depends(get_db)):
         for fav in recent_favorites.scalars().all():
             activities.append({
                 "type": "favorite",
-                "title": f"Favorited: {fav.news_item.title[:50]}..." if len(fav.news_item.title) > 50 else fav.news_item.title,
-                "description": f"Added {fav.news_item.title} to favorites",
+                "title": f'Favorited: {fav.news_item.title[:50]}...' if len(fav.news_item.title) > 50 else fav.news_item.title',
+                "description": f'Added {fav.news_item.title} to favorites',
                 "timestamp": fav.created_at.isoformat() if fav.created_at else None
             })
         
@@ -668,8 +668,8 @@ async def get_recent_activity(db: Session = Depends(get_db)):
         for broadcast in recent_broadcasts.scalars().all():
             activities.append({
                 "type": "broadcast",
-                "title": f"Broadcast to {broadcast.platform}",
-                "description": f"Sent broadcast to {broadcast.platform}",
+                "title": f'Broadcast to {broadcast.platform}',
+                "description": f'Sent broadcast to {broadcast.platform}',
                 "timestamp": broadcast.created_at.isoformat() if broadcast.created_at else None
             })
         
