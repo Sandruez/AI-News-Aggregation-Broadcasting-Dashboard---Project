@@ -12,19 +12,17 @@ COPY . .
 # Build application
 RUN npm run build
 
-# Production stage
-FROM node:18-alpine
-
-WORKDIR /app
-
-# Install serve globally
-RUN npm install -g serve
+# Production stage - use Caddy
+FROM caddy:alpine
 
 # Copy built app
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/dist /srv
+
+# Create Caddyfile with dynamic PORT
+RUN printf '%s\n' '{' '    auto_https off' '    :${PORT:-80} {' '        root * /srv' '        file_server' '        try_files {path} /index.html' '    }' '}' > /etc/caddy/Caddyfile
 
 # Expose port
-EXPOSE 3000
+EXPOSE 80
 
-# Start serve with shell handling PORT
-CMD ["/bin/sh", "-c", "PORT=${PORT:-3000} && echo \"Starting server on port $PORT\" && exec serve -s dist -l tcp://0.0.0.0:$PORT --no-clipboard"]
+# Start Caddy
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
