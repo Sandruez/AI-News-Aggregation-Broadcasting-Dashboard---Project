@@ -17,13 +17,10 @@ RUN pip install --no-cache-dir -r requirements.prod.txt
 # Copy application code
 COPY . .
 
-# Make startup script executable
-RUN chmod +x start.sh
-
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash app \
     && chown -R app:app /app
 USER app
 
-# Production startup command
-CMD ["./start.sh"]
+# Production startup command - Python handles port internally
+CMD ["python", "main.py"]
