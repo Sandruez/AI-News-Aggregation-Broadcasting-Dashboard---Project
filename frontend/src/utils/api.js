@@ -9,7 +9,7 @@ if (!apiUrl) {
 }
 
 const api = axios.create({
-  baseURL: apiUrl || '/api', // Fallback to relative path if env var not set
+  baseURL: apiUrl, // Fallback to relative path if env var not set
   timeout: 15000,
 })
 
