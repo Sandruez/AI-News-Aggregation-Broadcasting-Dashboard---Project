@@ -1,6 +1,8 @@
 # Production Frontend Railway Configuration
 [build]
-builder = "NIXPACKS"
+builder = "DOCKERFILE"
+dockerfilePath = "frontend/Dockerfile.prod"
+dockerContext = "frontend/"
 
 [deploy]
 restartPolicyType = "ON_FAILURE"
@@ -13,6 +15,8 @@ VITE_APP_VERSION = "2.0.0"
 
 [[services]]
 name = "frontend"
+[services.ports]
+port = 80
 [services.healthChecks]
 path = "/"
 interval = "15s"

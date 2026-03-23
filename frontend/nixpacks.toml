@@ -1,10 +1,5 @@
-[phases.setup]
-nixpkgs = ["https://nixos.org/nixpkgs/archive/nixos-23.05.tar.gz"]
-
 [phases.build]
-nixpkgs = "https://nixos.org/nixpkgs/archive/nixos-23.05.tar.gz"
-cmd = "npm install && npm run build"
+cmd = "npm run build"
 
 [start]
-nixpkgs = "https://nixos.org/nixpkgs/archive/nixos-23.05.tar.gz"
-cmd = "npm install && npm run start"
+cmd = "npm run start"
