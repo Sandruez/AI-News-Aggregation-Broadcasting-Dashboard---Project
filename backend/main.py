@@ -615,6 +615,16 @@ async def test_fetch():
         logger.error(f"Test fetch error: {e}")
         return {"error": str(e), "source": test_source.name}
 
+@app.post("/api/admin/insert-sample-data")
+async def manual_insert_sample_data():
+    """Manually insert sample data"""
+    try:
+        await insert_sample_data()
+        return {"message": "Sample data inserted successfully", "status": "success"}
+    except Exception as e:
+        logger.error(f"Error inserting sample data: {e}")
+        raise HTTPException(status_code=500, detail="Failed to insert sample data")
+
 @app.post("/api/admin/trigger-ingestion")
 async def trigger_ingestion():
     """Manually trigger news ingestion for debugging"""
