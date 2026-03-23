@@ -435,18 +435,38 @@ async def get_news_trend(days: int = 7, db: Session = Depends(get_db)):
         if db is None:
             return {"trend": []}
         
-        # Simple mock data for now
-        return {
-            "trend": [
-                {"date": "2024-01-15", "count": 12},
-                {"date": "2024-01-16", "count": 18},
-                {"date": "2024-01-17", "count": 15},
-                {"date": "2024-01-18", "count": 22},
-                {"date": "2024-01-19", "count": 25},
-                {"date": "2024-01-20", "count": 20},
-                {"date": "2024-01-21", "count": 28}
-            ]
-        }
+        from datetime import datetime, timedelta
+        
+        # Calculate date range
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days)
+        
+        # Query news items by date range
+        result = db.execute(
+            select(
+                func.date(NewsItem.published_at).label('date'),
+                func.count(NewsItem.id).label('count')
+            )
+            .where(NewsItem.published_at >= start_date)
+            .where(NewsItem.published_at <= end_date)
+            .group_by(func.date(NewsItem.published_at))
+            .order_by(func.date(NewsItem.published_at))
+        )
+        
+        # Format data for frontend
+        trend_data = []
+        for row in result:
+            trend_data.append({
+                "date": row.date.strftime("%Y-%m-%d"),
+                "articles": row.count,
+                "duplicates": 0  # TODO: Calculate actual duplicates
+            })
+        
+        # If no data, return empty array
+        if not trend_data:
+            return {"trend": []}
+        
+        return {"trend": trend_data}
             
     except Exception as e:
         logger.error(f"Error fetching news trend: {e}")
@@ -525,21 +545,41 @@ async def get_broadcast_analytics(db: Session = Depends(get_db)):
         if db is None:
             return {"analytics": {}}
         
-        # Simple mock data for now
+        # Query real data from database
+        result = db.execute(
+            select(
+                func.count(BroadcastLog.id).label('total_broadcasts'),
+                func.sum(
+                    case(
+                        (BroadcastLog.status == 'sent', 1),
+                        else_ = 0
+                    )
+                ).label('successful_broadcasts'),
+                func.sum(
+                    case(
+                        (BroadcastLog.status == 'sent', 1),
+                        else_ = 0
+                    )
+                ).label('failed_broadcasts'),
+                func.count(BroadcastLog.favorite_id).label('total_recipients')
+            )
+        )
+        
+        row = result.first()
+        
         return {
             "analytics": {
-                "total_broadcasts": 156,
-                "successful_broadcasts": 142,
-                "failed_broadcasts": 14,
-                "total_recipients": 2847,
-                "average_open_rate": 0.68,
-                "platforms": {
-                    "email": 89,
-                    "linkedin": 45,
-                    "twitter": 22
-                }
+                "total_broadcasts": row.total_broadcasts or 0,
+                "successful_broadcasts": row.successful_broadcasts or 0,
+                "failed_broadcasts": row.failed_broadcasts or 0,
+                "total_recipients": row.total_recipients or 0,
+                "average_open_rate": 0.68  # TODO: Calculate actual rate
             }
         }
+            
+    except Exception as e:
+        logger.error(f"Error fetching broadcast analytics: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch broadcast analytics")
             
     except Exception as e:
         logger.error(f"Error fetching broadcast analytics: {e}")
@@ -550,17 +590,15 @@ async def get_system_health(db: Session = Depends(get_db)):
     """Get system health data for admin dashboard"""
     try:
         # Health check data
-        return {
-            "health": {
-                "database": "healthy" if db is not None else "unhealthy",
-                "api": "healthy",
-                "memory_usage": 0.65,
-                "cpu_usage": 0.42,
-                "disk_usage": 0.38,
-                "uptime": "5 days, 12 hours",
-                "last_restart": "2024-01-16T08:30:00Z"
-            }
+        health_data = {
+            "uptime": "N/A",  # TODO: Calculate actual uptime
+            "database_status": "connected" if db else "disconnected",
+            "last_ingestion": "N/A",  # TODO: Get last ingestion time
+            "memory_usage": "N/A",  # TODO: Get actual memory usage
+            "disk_space": "N/A"  # TODO: Get actual disk space
         }
+        
+        return health_data
             
     except Exception as e:
         logger.error(f"Error fetching system health: {e}")
@@ -571,17 +609,74 @@ async def get_recent_activity(db: Session = Depends(get_db)):
     """Get recent activity data for admin dashboard"""
     try:
         if db is None:
-            return {"activities": []}
+            return {"activity": []}
         
-        # Simple mock data for now
-        return {
-            "activities": [
-                {"id": 1, "type": "news_added", "message": "New article: AI Breakthrough in Healthcare", "timestamp": "2024-01-21T14:30:00Z"},
-                {"id": 2, "type": "broadcast_sent", "message": "Newsletter sent to 1,245 subscribers", "timestamp": "2024-01-21T12:15:00Z"},
-                {"id": 3, "type": "source_added", "message": "New source added: MIT Technology Review", "timestamp": "2024-01-21T10:45:00Z"},
-                {"id": 4, "type": "user_favorite", "message": "User favorited article about OpenAI", "timestamp": "2024-01-21T09:20:00Z"},
-                {"id": 5, "type": "system_restart", "message": "System restarted successfully", "timestamp": "2024-01-21T08:30:00Z"}
-            ]
+        # Query recent activity from database
+        from datetime import datetime, timedelta
+        
+        # Get recent news items (last 7 days)
+        week_ago = datetime.now() - timedelta(days=7)
+        
+        recent_news = db.execute(
+            select(NewsItem.title, NewsItem.published_at, NewsItem.source)
+                .options(selectinload(NewsItem.source))
+                .where(NewsItem.published_at >= week_ago)
+                .order_by(NewsItem.published_at.desc())
+                .limit(10)
+        )
+        
+        # Get recent favorites (last 7 days)
+        recent_favorites = db.execute(
+            select(Favorite.created_at, Favorite.news_item)
+                .options(selectinload(Favorite.news_item))
+                .where(Favorite.created_at >= week_ago)
+                .order_by(Favorite.created_at.desc())
+                .limit(5)
+        )
+        
+        # Get recent broadcasts (last 7 days)
+        recent_broadcasts = db.execute(
+            select(BroadcastLog.created_at, BroadcastLog.platform, BroadcastLog.status)
+                .where(BroadcastLog.created_at >= week_ago)
+                .order_by(BroadcastLog.created_at.desc())
+                .limit(5)
+        )
+        
+        # Combine activities
+        activities = []
+        
+        # Add news items
+        for item in recent_news.scalars().all():
+            activities.append({
+                "type": "news",
+                "title": item.title[:50] + "..." if len(item.title) > 50 else item.title,
+                "description": f"New article: {item.title}",
+                "timestamp": item.published_at.isoformat() if item.published_at else None,
+                "source": item.source.name if item.source else "Unknown"
+            })
+        
+        # Add favorites
+        for fav in recent_favorites.scalars().all():
+            activities.append({
+                "type": "favorite",
+                "title": f"Favorited: {fav.news_item.title[:50]}..." if len(fav.news_item.title) > 50 else fav.news_item.title,
+                "description": f"Added {fav.news_item.title} to favorites",
+                "timestamp": fav.created_at.isoformat() if fav.created_at else None
+            })
+        
+        # Add broadcasts
+        for broadcast in recent_broadcasts.scalars().all():
+            activities.append({
+                "type": "broadcast",
+                "title": f"Broadcast to {broadcast.platform}",
+                "description": f"Sent broadcast to {broadcast.platform}",
+                "timestamp": broadcast.created_at.isoformat() if broadcast.created_at else None
+            })
+        
+        # Sort by timestamp
+        activities.sort(key=lambda x: x["timestamp"], reverse=True)
+        
+        return {"activity": activities}
         }
             
     except Exception as e:
