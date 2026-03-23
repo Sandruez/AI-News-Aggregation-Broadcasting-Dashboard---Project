@@ -23,8 +23,11 @@ RUN npm install -g serve
 # Copy built app
 COPY --from=builder /app/dist ./dist
 
-# Expose port (Railway will provide actual PORT env var)
+# Create startup script
+RUN echo '#!/bin/sh\nPORT=${PORT:-3000}\necho "Starting server on port $PORT"\nexec serve -s dist -l tcp://0.0.0.0:$PORT --no-clipboard' > start.sh && chmod +x start.sh
+
+# Expose port
 EXPOSE 3000
 
-# Start serve with dynamic PORT and bind to all interfaces
-CMD ["sh", "-c", "serve -s dist -l tcp://0.0.0.0:${PORT:-3000} --no-clipboard"]
+# Start serve
+CMD ["./start.sh"]
