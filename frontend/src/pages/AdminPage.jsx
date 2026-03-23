@@ -73,7 +73,14 @@ export default function AdminPage() {
     )
   }
 
-  if (!stats) return null
+  if (!stats || !stats.overview) {
+    return (
+      <div className="flex items-center justify-center py-20 text-ink-500">
+        <Activity className="animate-spin mr-3" size={24} />
+        <span className="font-body text-sm">Loading admin dashboard…</span>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
@@ -106,7 +113,7 @@ export default function AdminPage() {
             <span className="text-xs text-ink-400">Total</span>
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">{stats.overview.totalNews.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-white">{(stats.overview.totalNews || 0).toLocaleString()}</div>
             <div className="text-xs text-ink-400">News Articles</div>
           </div>
         </div>
@@ -128,7 +135,7 @@ export default function AdminPage() {
             <span className="text-xs text-ink-400">Total</span>
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">{stats.overview.totalBroadcasts}</div>
+            <div className="text-2xl font-bold text-white">{(stats.overview.totalBroadcasts || 0).toLocaleString()}</div>
             <div className="text-xs text-ink-400">Broadcasts</div>
           </div>
         </div>
@@ -139,7 +146,7 @@ export default function AdminPage() {
             <span className="text-xs text-ink-400">Active</span>
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">{stats.overview.activeSources}</div>
+            <div className="text-2xl font-bold text-white">{(stats.overview.activeSources || 0).toLocaleString()}</div>
             <div className="text-xs text-ink-400">Sources</div>
           </div>
         </div>
@@ -150,7 +157,7 @@ export default function AdminPage() {
             <span className="text-xs text-ink-400">Recent</span>
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">{stats.overview.recentNews}</div>
+            <div className="text-2xl font-bold text-white">{(stats.overview.recentNews || 0).toLocaleString()}</div>
             <div className="text-xs text-ink-400">Recent News</div>
           </div>
         </div>
@@ -161,7 +168,7 @@ export default function AdminPage() {
             <span className="text-xs text-ink-400">Current</span>
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">{stats.overview.uptime}</div>
+            <div className="text-2xl font-bold text-white">{stats.overview.uptime || 'N/A'}</div>
             <div className="text-xs text-ink-400">Uptime</div>
           </div>
         </div>
@@ -173,7 +180,7 @@ export default function AdminPage() {
         <div className="bg-ink-800 border border-ink-600 rounded-xl p-6">
           <h3 className="font-semibold text-white mb-4">News Ingestion Trend</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={stats.newsTrend}>
+            <LineChart data={stats.newsTrend || []}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="date" stroke="#9CA3AF" />
               <YAxis stroke="#9CA3AF" />
@@ -193,15 +200,15 @@ export default function AdminPage() {
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={stats.sourceDistribution}
+                data={stats.sourceDistribution || []}
                 cx="50%"
                 cy="50%"
                 outerRadius={100}
                 fill="#8884d8"
-                dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                dataKey="count"
+                label={({ source, percent }) => `${source} ${(percent * 100).toFixed(0)}%`}
               >
-                {stats.sourceDistribution.map((entry, index) => (
+                {(stats.sourceDistribution || []).map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -215,7 +222,7 @@ export default function AdminPage() {
       <div className="bg-ink-800 border border-ink-600 rounded-xl p-6">
         <h3 className="font-semibold text-white mb-4">Category Performance</h3>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={stats.categoryBreakdown}>
+          <BarChart data={stats.categoryBreakdown || []}>
             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
             <XAxis dataKey="category" stroke="#9CA3AF" />
             <YAxis stroke="#9CA3AF" />

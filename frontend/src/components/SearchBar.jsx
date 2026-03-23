@@ -30,7 +30,8 @@ export default function SearchBar({ params, setParams, onRefresh, refreshing, to
             ref={searchRef}
             type="text"
             placeholder="Search AI news…"
-            defaultValue={params.q || ''}
+            value={params.q || ''}
+            onChange={e => updateParam('q', e.target.value)}
             onKeyDown={e => e.key === 'Enter' && updateParam('q', e.target.value)}
             className="w-full bg-ink-800 border border-ink-600 rounded-lg pl-9 pr-4 py-2 text-sm text-white 
                        placeholder:text-ink-500 focus:outline-none focus:border-pulse-500 transition-colors font-body"
