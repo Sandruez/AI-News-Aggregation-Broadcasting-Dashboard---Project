@@ -720,6 +720,10 @@ async def get_feed(db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(f"Error fetching feed: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch feed")
+            
+    except Exception as e:
+        logger.error(f"Error fetching feed: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch feed")
 
 @app.post("/api/admin/test-fetch")
 async def test_fetch():
