@@ -8,5 +8,6 @@ VITE_API_URL = "${{services.BACKEND.url}}/api"
 
 [[services]]
 name = "frontend"
+startCommand = "npm run build && npm run start"
 [services.healthChecks]
 path = "/"
