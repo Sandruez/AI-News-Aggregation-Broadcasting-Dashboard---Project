@@ -88,7 +88,8 @@ async def get_db():
     async with AsyncSessionLocal() as session:
         try:
             yield session
-            await session.commit()
+            # Don't auto-commit here, let the endpoints handle it
+            # or use session.commit() explicitly in the endpoint
         except Exception:
             await session.rollback()
             raise
