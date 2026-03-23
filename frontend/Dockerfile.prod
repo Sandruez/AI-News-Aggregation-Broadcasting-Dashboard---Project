@@ -12,12 +12,14 @@ COPY . .
 # Build application
 RUN npm run build
 
-# Production stage - use Caddy
+# Production stage - use Caddy with SPA support
 FROM caddy:alpine
 
 # Copy built app
 COPY --from=builder /app/dist /srv
 
-# Start Caddy using shell form to allow $PORT expansion directly in the command
-# We use -c to provide the config string directly to avoid file not found issues with /start.sh
-CMD ["sh", "-c", "caddy file-server --root /srv --listen :${PORT:-80} --access-log"]
+# Create Caddyfile for SPA support
+RUN printf ':${PORT:-80} {\n    root * /srv\n    file_server\n    try_files {path} {path}/ /index.html\n    encode zstd gzip\n}\n' > /etc/caddy/Caddyfile
+
+# Start Caddy
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]

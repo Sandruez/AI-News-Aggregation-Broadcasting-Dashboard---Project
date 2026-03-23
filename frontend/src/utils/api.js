@@ -14,6 +14,9 @@ const api = axios.create({
 })
 
 // All endpoints already start with /api/...
+// Feed
+export const fetchFeed = () => api.get('/feed').then(r => r.data)
+
 // News
 export const fetchNews = (params) => api.get('/api/news', { params }).then(r => r.data)
 export const refreshNews = () => api.post('/api/news/refresh').then(r => r.data)
