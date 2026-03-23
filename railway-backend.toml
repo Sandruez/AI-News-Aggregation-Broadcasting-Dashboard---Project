@@ -1,14 +1,30 @@
-# Minimal Backend Railway Configuration
+# Production Backend Railway Configuration
 [build]
-builder = "NIXPACKS"
+builder = "DOCKERFILE"
+dockerfilePath = "backend/Dockerfile"
+dockerContext = "backend/"
 
 [deploy]
-startCommand = "python backend/minimal_main.py"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
 [env]
-PORT = "8000"
+ENVIRONMENT = "production"
+PYTHONUNBUFFERED = "1"
+PYTHONDONTWRITEBYTECODE = "1"
+# Database
+DATABASE_URL = "${{RAILWAY_ENVIRONMENT.DATABASE_URL}}"
+# Groq AI
+GROQ_API_KEY = "${{RAILWAY_ENVIRONMENT.GROQ_API_KEY}}"
+GROQ_MODEL = "llama3-8b-8192"
+# Email broadcasting
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = "587"
+SMTP_USER = "${{RAILWAY_ENVIRONMENT.SMTP_USER}}"
+SMTP_PASSWORD = "${{RAILWAY_ENVIRONMENT.SMTP_PASSWORD}}"
+SMTP_FROM = "${{RAILWAY_ENVIRONMENT.SMTP_FROM}}"
+# LinkedIn
+LINKEDIN_ACCESS_TOKEN = "${{RAILWAY_ENVIRONMENT.LINKEDIN_ACCESS_TOKEN}}"
 
 [[services]]
 name = "backend"

@@ -24,5 +24,5 @@ USER app
 
 EXPOSE 8000
 
-# Simple startup command
-CMD ["python", "minimal_main.py"]
+# Production startup command
+CMD ["uvicorn", "production_main:app", "--host", "0.0.0.0", "--port", "8000"]

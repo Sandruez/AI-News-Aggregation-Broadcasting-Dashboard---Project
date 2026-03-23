@@ -1,4 +1,4 @@
-# Frontend Railway Configuration
+# Production Frontend Railway Configuration
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "frontend/Dockerfile.prod"
@@ -10,6 +10,8 @@ restartPolicyMaxRetries = 10
 
 [env]
 VITE_API_URL = "https://ai-news-aggregation-broadcasting-dashboard-pro-production.up.railway.app/api"
+VITE_APP_NAME = "AI News Dashboard"
+VITE_APP_VERSION = "2.0.0"
 
 [[services]]
 name = "frontend"
