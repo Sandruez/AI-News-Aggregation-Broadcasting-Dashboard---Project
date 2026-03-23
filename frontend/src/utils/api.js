@@ -1,6 +1,7 @@
 import axios from 'axios'
 
 // Production-ready API configuration with fallback
+// Note: VITE_API_URL should NOT include /api suffix
 const apiUrl = import.meta.env.VITE_API_URL
 
 if (!apiUrl) {
@@ -8,10 +9,11 @@ if (!apiUrl) {
 }
 
 const api = axios.create({
-  baseURL: apiUrl || '/api', // Fallback to relative path if env var not set
+  baseURL: apiUrl || '', // Fallback to relative path if env var not set
   timeout: 15000,
 })
 
+// All endpoints already start with /api/...
 // News
 export const fetchNews = (params) => api.get('/api/news', { params }).then(r => r.data)
 export const refreshNews = () => api.post('/api/news/refresh').then(r => r.data)

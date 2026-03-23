@@ -38,6 +38,12 @@ class NewsItem(Base):
     duplicate_of = Column(Integer, ForeignKey("news_items.id"), nullable=True)
     content_hash = Column(String(64))
     impact_score = Column(Integer, default=0)
+    category = Column(String(100))
+    image_url = Column(String(512))
+    sentiment = Column(String(50))
+    relevance_score = Column(func.float(), default=0.0)
+    raw_content = Column(Text)
+    guid = Column(String(512), unique=True)
 
     source = relationship("Source", back_populates="news_items")
     favorites = relationship("Favorite", back_populates="news_item")
@@ -60,7 +66,7 @@ class BroadcastLog(Base):
     __tablename__ = "broadcast_logs"
 
     id = Column(Integer, primary_key=True)
-    favorite_id = Column(Integer, ForeignKey("favorites.id"), nullable=False)
+    favorite_id = Column(Integer, ForeignKey("favorites.id"), nullable=True)
     platform = Column(String(50))  # email | linkedin | whatsapp | blog | newsletter
     status = Column(String(50), default="pending")  # pending | sent | failed
     payload = Column(JSON)

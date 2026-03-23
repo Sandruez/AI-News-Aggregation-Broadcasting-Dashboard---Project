@@ -17,14 +17,24 @@ export default function SourcesPage() {
   const [toggling, setToggling] = useState(null)
 
   useEffect(() => {
-    fetchSources().then(data => { setSources(data); setLoading(false) })
+    fetchSources().then(data => { 
+      // Handle both wrapped and unwrapped response
+      const items = data?.items || data || []
+      setSources(items)
+      setLoading(false) 
+    }).catch(err => {
+      console.error('Failed to fetch sources:', err)
+      setLoading(false)
+    })
   }, [])
 
   const handleToggle = async (source) => {
     setToggling(source.id)
     try {
       const result = await toggleSource(source.id)
-      setSources(prev => prev.map(s => s.id === source.id ? { ...s, active: result.active } : s))
+      // Handle both {active} and {is_active} in response
+      const newState = result.is_active !== undefined ? result.is_active : result.active
+      setSources(prev => prev.map(s => s.id === source.id ? { ...s, active: newState, is_active: newState } : s))
     } catch (e) {
       console.error(e)
     } finally {
@@ -32,14 +42,15 @@ export default function SourcesPage() {
     }
   }
 
-  const active = sources.filter(s => s.active).length
+  const sourceList = Array.isArray(sources) ? sources : []
+  const activeCount = sourceList.filter(s => s.active || s.is_active).length
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8">
       <div className="mb-6">
         <h1 className="font-display font-800 text-2xl text-white tracking-tight">Sources</h1>
         <p className="text-sm text-ink-400 mt-1 font-body">
-          {active} of {sources.length} sources active. Toggle to include or exclude from ingestion.
+          {activeCount} of {sourceList.length} sources active. Toggle to include or exclude from ingestion.
         </p>
       </div>
 
@@ -52,12 +63,12 @@ export default function SourcesPage() {
 
       {!loading && (
         <div className="grid gap-2">
-          {sources.map((source, i) => (
+          {sourceList.map((source, i) => (
             <div
               key={source.id}
               className={clsx(
                 'card flex items-center justify-between px-4 py-3 animate-slide-up',
-                !source.active && 'opacity-50'
+                !(source.active || source.is_active) && 'opacity-50'
               )}
               style={{ animationDelay: `${i * 15}ms` }}
             >
@@ -88,11 +99,11 @@ export default function SourcesPage() {
                   onClick={() => handleToggle(source)}
                   disabled={toggling === source.id}
                   className="text-ink-400 hover:text-white transition-colors disabled:opacity-50"
-                  title={source.active ? 'Disable source' : 'Enable source'}
+                  title={(source.active || source.is_active) ? 'Disable source' : 'Enable source'}
                 >
                   {toggling === source.id
                     ? <Loader2 size={20} className="animate-spin" />
-                    : source.active
+                    : (source.active || source.is_active)
                       ? <ToggleRight size={20} className="text-pulse-400" />
                       : <ToggleLeft size={20} />
                   }
