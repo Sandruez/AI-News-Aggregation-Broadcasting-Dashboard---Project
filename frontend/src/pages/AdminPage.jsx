@@ -32,7 +32,7 @@ export default function AdminPage() {
 
       setStats({
         overview,
-        newsTrend: newsTrend || [],
+        newsTrend: newsTrend?.trend || newsTrend || [],
         sourceDistribution: (sourceDist?.distribution || sourceDist || []).map((item, index) => ({
           ...item,
           color: COLORS[index % COLORS.length]
