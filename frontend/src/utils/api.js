@@ -15,9 +15,13 @@ const api = axios.create({
 
 // Add error handling for API calls
 api.interceptors.response.use(
-  response => response,
+  response => {
+    console.log('API Response:', response.config.url, response.status)
+    return response
+  },
   error => {
     console.error('API Error:', error.message)
+    console.error('API Error Details:', error.response?.data)
     if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
       console.error('Backend not accessible - check if backend service is running')
     }

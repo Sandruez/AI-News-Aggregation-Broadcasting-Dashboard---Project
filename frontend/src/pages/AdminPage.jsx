@@ -49,7 +49,7 @@ export default function AdminPage() {
       })
     } catch (error) {
       console.error('Failed to fetch admin stats:', error)
-      // Set mock data as fallback
+      // Set empty state as fallback (not mock data)
       setStats({
         overview: { totalNews: 0, totalFavorites: 0, totalBroadcasts: 0, activeSources: 0, recentNews: 0, uptime: "N/A" },
         newsTrend: [],

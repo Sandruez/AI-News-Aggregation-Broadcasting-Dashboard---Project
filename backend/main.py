@@ -145,12 +145,17 @@ async def get_news(
                     "title": item.title,
                     "summary": item.summary,
                     "url": item.url,
-                    "source": item.source.name if item.source else "Unknown",
+                    "source": {
+                        "name": item.source.name if item.source else "Unknown",
+                        "category": item.source.category if item.source else "general"
+                    },
                     "published_at": item.published_at.isoformat() if item.published_at else None,
                     "impact_score": item.impact_score,
                     "category": item.category,
                     "sentiment": item.sentiment,
-                    "relevance_score": item.relevance_score
+                    "relevance_score": item.relevance_score,
+                    "tags": item.tags or [],
+                    "is_favorited": False  # TODO: Check if item is favorited
                 } for item in items
             ],
             "total": total_result,
@@ -183,13 +188,18 @@ def get_news_item(item_id: int, db: Session = Depends(get_db)):
             "title": item.title,
             "summary": item.summary,
             "url": item.url,
-            "source": item.source.name if item.source else "Unknown",
+            "source": {
+                "name": item.source.name if item.source else "Unknown",
+                "category": item.source.category if item.source else "general"
+            },
             "published_at": item.published_at.isoformat() if item.published_at else None,
             "impact_score": item.impact_score,
             "category": item.category,
             "sentiment": item.sentiment,
             "relevance_score": item.relevance_score,
-            "raw_content": item.raw_content
+            "raw_content": item.raw_content,
+            "tags": item.tags or [],
+            "is_favorited": False
         }
         
     except HTTPException:
@@ -575,8 +585,13 @@ async def get_feed(db: Session = Depends(get_db)):
                     "title": item.title,
                     "summary": item.summary,
                     "url": item.url,
-                    "source": item.source.name if item.source else "Unknown",
-                    "published_at": item.published_at.isoformat() if item.published_at else None
+                    "source": {
+                        "name": item.source.name if item.source else "Unknown",
+                        "category": item.source.category if item.source else "general"
+                    },
+                    "published_at": item.published_at.isoformat() if item.published_at else None,
+                    "tags": item.tags or [],
+                    "is_favorited": False
                 } for item in items
             ],
             "total": len(items)

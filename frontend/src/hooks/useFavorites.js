@@ -9,9 +9,12 @@ export function useFavorites() {
     setLoading(true)
     try {
       const data = await fetchFavorites()
-      setFavorites(data)
+      // Handle both wrapped and unwrapped response
+      const items = data?.items || data || []
+      setFavorites(items)
     } catch (e) {
-      console.error(e)
+      console.error('Failed to load favorites:', e)
+      setFavorites([]) // Set empty array on error
     } finally {
       setLoading(false)
     }
