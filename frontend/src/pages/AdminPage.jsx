@@ -16,6 +16,7 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'
 export default function AdminPage() {
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [timeRange, setTimeRange] = useState('7d')
 
   useEffect(() => {
@@ -24,7 +25,9 @@ export default function AdminPage() {
 
   const fetchAdminStats = async () => {
     setLoading(true)
+    setError(null)
     try {
+      console.log('Starting admin stats fetch...')
       const [overview, newsTrend, sourceDist, categories, broadcasts, health, activity] = await Promise.all([
         fetchAdminOverview(),
         fetchNewsTrend(timeRange === '24h' ? 1 : timeRange === '7d' ? 7 : 30),
@@ -34,6 +37,8 @@ export default function AdminPage() {
         fetchSystemHealth(),
         fetchRecentActivity()
       ])
+
+      console.log('Admin API responses:', { overview, newsTrend, sourceDist, categories, broadcasts, health, activity })
 
       setStats({
         overview,
@@ -49,6 +54,7 @@ export default function AdminPage() {
       })
     } catch (error) {
       console.error('Failed to fetch admin stats:', error)
+      setError(error.message || 'Failed to fetch admin stats')
       // Set empty state as fallback (not mock data)
       setStats({
         overview: { totalNews: 0, totalFavorites: 0, totalBroadcasts: 0, activeSources: 0, recentNews: 0, uptime: "N/A" },
@@ -78,6 +84,28 @@ export default function AdminPage() {
       <div className="flex items-center justify-center py-20 text-ink-500">
         <Activity className="animate-spin mr-3" size={24} />
         <span className="font-body text-sm">Loading admin dashboard…</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-ink-500">
+        <AlertTriangle size={48} className="text-red-400 mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Admin Dashboard Error</h2>
+        <p className="text-sm max-w-md text-center">{error}</p>
+        <button
+          onClick={fetchAdminStats}
+          className="mt-4 px-4 py-2 bg-pulse-500 text-white rounded-lg hover:bg-pulse-600 transition-colors"
+        >
+          Try Again
+        </button>
+        <button
+          onClick={() => console.log('Current stats:', stats)}
+          className="mt-2 px-4 py-1 bg-ink-700 text-ink-300 rounded text-xs"
+        >
+          Debug Stats
+        </button>
       </div>
     )
   }
