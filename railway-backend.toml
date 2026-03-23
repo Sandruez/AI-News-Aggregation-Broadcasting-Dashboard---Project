@@ -3,13 +3,10 @@
 builder = "DOCKERFILE"
 dockerfilePath = "backend/Dockerfile"
 
-[deploy]
-startCommand = "python main.py"
-
 [env]
 PYTHONUNBUFFERED = "1"
 
 [[services]]
 name = "backend"
 [services.healthChecks]
-path = "/health"
+path = "/"
