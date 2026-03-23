@@ -29,21 +29,16 @@ async def lifespan(app: FastAPI):
     # Initialize database
     if settings.database_url:
         try:
-            await init_engine()
+            from database import init_db
+            await init_db()
             logger.info("Database initialized successfully")
-            
-            # Run migrations
-            from database import engine
-            async with engine.begin() as conn:
-                await conn.run_sync(Base.metadata.create_all)
-            logger.info("Database migrations completed")
             
             # Insert sample data if needed
             await insert_sample_data()
             
         except Exception as e:
             logger.error(f"Database initialization failed: {e}")
-            raise
+            # Don't raise - continue without database
     else:
         logger.warning("No database URL provided - running without database")
     
