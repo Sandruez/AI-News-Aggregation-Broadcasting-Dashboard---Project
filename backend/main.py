@@ -553,7 +553,7 @@ async def get_recent_activity(db: Session = Depends(get_db)):
         logger.error(f"Error fetching recent activity: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch recent activity")
 
-@app.get("/feed")
+@app.get("/api/feed")
 async def get_feed(db: Session = Depends(get_db)):
     """RSS feed endpoint"""
     try:
