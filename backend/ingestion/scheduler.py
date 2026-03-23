@@ -24,11 +24,14 @@ settings = get_settings()
 
 async def seed_sources():
     """Ensure all sources from registry exist in DB."""
+    logger.info("Starting to seed sources...")
     db = SessionLocal()
     try:
+        sources_added = 0
         for sc in ALL_SOURCES:
             existing = db.execute(select(Source).where(Source.url == sc.url))
             if not existing.scalar_one_or_none():
+                logger.info(f"Adding new source: {sc.name}")
                 db.add(Source(
                     name=sc.name,
                     url=sc.url,
@@ -37,7 +40,11 @@ async def seed_sources():
                     category=sc.category,
                     active=sc.active,
                 ))
+                sources_added += 1
+            else:
+                logger.debug(f"Source already exists: {sc.name}")
         db.commit()
+        logger.info(f"Seeding complete. Added {sources_added} new sources.")
     except Exception as e:
         logger.error(f"Error seeding sources: {e}")
         db.rollback()
@@ -53,6 +60,7 @@ async def run_ingestion():
     try:
         sources_result = db.execute(select(Source).where(Source.active == True))
         sources = sources_result.scalars().all()
+        logger.info(f"Found {len(sources)} active sources to process")
 
         # Load recent hashes and titles for dedup
         recent_items = db.execute(
@@ -63,9 +71,11 @@ async def run_ingestion():
         rows = recent_items.all()
         existing_hashes = {r[0] for r in rows if r[0]}
         existing_titles = [r[1] for r in rows if r[1]]
+        logger.info(f"Loaded {len(existing_hashes)} existing hashes for deduplication")
 
         new_count = 0
         for source in sources:
+            logger.info(f"Processing source: {source.name} ({source.source_type})")
             try:
                 if source.source_type == "hn":
                     items = await fetch_hacker_news(source.id)
@@ -78,6 +88,8 @@ async def run_ingestion():
                         source.id,
                         settings.max_items_per_source,
                     )
+                
+                logger.info(f"Fetched {len(items)} items from {source.name}")
 
                 for item in items:
                     # Check URL uniqueness first
@@ -121,6 +133,7 @@ async def run_ingestion():
                     new_count += 1
 
                 db.commit()
+                logger.info(f"Added {len([i for i in items if not db.execute(select(NewsItem).where(NewsItem.url == i.url)).scalar_one_or_none()])} new items from {source.name}")
 
             except Exception as exc:
                 logger.error("Ingestion error for source %s: %s", source.name, exc)

@@ -553,38 +553,16 @@ async def get_recent_activity(db: Session = Depends(get_db)):
         logger.error(f"Error fetching recent activity: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch recent activity")
 
-@app.get("/feed")
-async def get_feed(db: Session = Depends(get_db)):
-    """RSS feed endpoint"""
+@app.post("/api/admin/trigger-ingestion")
+async def trigger_ingestion():
+    """Manually trigger news ingestion for debugging"""
     try:
-        if db is None:
-            return {"items": [], "total": 0}
-        
-        result = db.execute(
-            select(NewsItem).options(selectinload(NewsItem.source))
-            .order_by(NewsItem.published_at.desc())
-            .limit(20)
-        )
-        items = result.scalars().all()
-        
-        # TODO: Convert to proper RSS XML format
-        return {
-            "items": [
-                {
-                    "id": item.id,
-                    "title": item.title,
-                    "summary": item.summary,
-                    "url": item.url,
-                    "source": item.source.name if item.source else "Unknown",
-                    "published_at": item.published_at.isoformat() if item.published_at else None
-                } for item in items
-            ],
-            "total": len(items)
-        }
-            
+        from ingestion.scheduler import run_ingestion
+        asyncio.create_task(run_ingestion())
+        return {"message": "Ingestion triggered", "status": "success"}
     except Exception as e:
-        logger.error(f"Error fetching feed: {e}")
-        raise HTTPException(status_code=500, detail="Failed to fetch feed")
+        logger.error(f"Error triggering ingestion: {e}")
+        raise HTTPException(status_code=500, detail="Failed to trigger ingestion")
 
 async def insert_sample_data():
     """Insert sample data if database is empty"""
