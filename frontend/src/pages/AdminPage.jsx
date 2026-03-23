@@ -17,6 +17,8 @@ export default function AdminPage() {
       console.log('Fetching admin overview...')
       const overview = await fetchAdminOverview()
       console.log('Overview response:', overview)
+      
+      // Set stats with proper structure
       setStats(overview)
     } catch (error) {
       console.error('Failed to fetch admin overview:', error)
