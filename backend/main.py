@@ -553,6 +553,39 @@ async def get_recent_activity(db: Session = Depends(get_db)):
         logger.error(f"Error fetching recent activity: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch recent activity")
 
+@app.get("/feed")
+async def get_feed(db: Session = Depends(get_db)):
+    """RSS feed endpoint"""
+    try:
+        if db is None:
+            return {"items": [], "total": 0}
+        
+        result = db.execute(
+            select(NewsItem).options(selectinload(NewsItem.source))
+            .order_by(NewsItem.published_at.desc())
+            .limit(20)
+        )
+        items = result.scalars().all()
+        
+        # TODO: Convert to proper RSS XML format
+        return {
+            "items": [
+                {
+                    "id": item.id,
+                    "title": item.title,
+                    "summary": item.summary,
+                    "url": item.url,
+                    "source": item.source.name if item.source else "Unknown",
+                    "published_at": item.published_at.isoformat() if item.published_at else None
+                } for item in items
+            ],
+            "total": len(items)
+        }
+            
+    except Exception as e:
+        logger.error(f"Error fetching feed: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch feed")
+
 @app.post("/api/admin/test-fetch")
 async def test_fetch():
     """Test RSS fetcher directly"""
