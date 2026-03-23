@@ -31,17 +31,20 @@ async def lifespan(app: FastAPI):
         try:
             from database import init_db
             await init_db()
-            logger.info("Database initialized successfully")
+            logger.info("Database initialized successfully (create_all run)")
             
-            # Start news ingestion in background
-            asyncio.create_task(run_ingestion_scheduler())
-            logger.info("News ingestion scheduler started in background")
+            # Start news ingestion in background using the correct scheduler
+            from ingestion.scheduler import start_scheduler
+            asyncio.create_task(start_scheduler())
+            logger.info("News ingestion scheduler started in background via ingestion.scheduler")
             
             # Insert sample data if needed
             await insert_sample_data()
             
         except Exception as e:
             logger.error(f"Database initialization failed: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             # Don't raise - continue without database
     else:
         logger.warning("No database URL provided - running without database")
@@ -51,24 +54,8 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down AI News Dashboard...")
 
 async def run_ingestion_scheduler():
-    """Background task for periodic news ingestion"""
-    while True:
-        try:
-            logger.info("Starting periodic news ingestion...")
-            # We'll need a database session for this
-            from database import get_db
-            async for db in get_db():
-                if db:
-                    # TODO: Implement actual ingestion logic here
-                    # For now, just log and wait
-                    logger.info("Ingestion cycle completed (mock)")
-                    break
-            
-            # Wait for 1 hour before next run
-            await asyncio.sleep(3600)
-        except Exception as e:
-            logger.error(f"Error in ingestion scheduler: {e}")
-            await asyncio.sleep(60)  # Wait a bit before retrying on error
+    """DEPRECATED: Use ingestion.scheduler.start_scheduler instead."""
+    pass
 
 app = FastAPI(
     title="AI News Dashboard API",
