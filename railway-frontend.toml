@@ -1,10 +1,9 @@
 # Production Frontend Railway Configuration
 [build]
-builder = "DOCKERFILE"
-dockerfilePath = "frontend/Dockerfile.prod"
-dockerContext = "frontend/"
+builder = "NIXPACKS"
 
 [deploy]
+startCommand = "npm run start"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
