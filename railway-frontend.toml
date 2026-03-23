@@ -1,4 +1,4 @@
-# Frontend Service - React/Vite with Nixpacks (Simple)
+# Frontend Service - React/Vite with serve (Production Ready)
 [build]
 builder = "NIXPACKS"
 
