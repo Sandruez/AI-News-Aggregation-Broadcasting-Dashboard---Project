@@ -14,7 +14,10 @@ export default function SearchBar({ params, setParams, onRefresh, refreshing, to
   const [showFilters, setShowFilters] = useState(false)
   const searchRef = useRef()
 
-  const updateParam = (key, value) => setParams(p => ({ ...p, [key]: value || null, page: 1 }))
+  const updateParam = (key, value) => {
+    console.log('Updating param:', key, '=', value) // Debug logging
+    setParams(p => ({ ...p, [key]: value || null, page: 1 }))
+  }
 
   return (
     <div className="space-y-3">

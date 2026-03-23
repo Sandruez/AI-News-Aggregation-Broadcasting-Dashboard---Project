@@ -22,7 +22,9 @@ export function useNews() {
     setError(null)
     try {
       const clean = Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ''))
+      console.log('Fetching news with params:', clean) // Debug logging
       const data = await fetchNews(clean)
+      console.log('News response:', data) // Debug logging
       setItems(data.items || [])
       setTotal(data.total || 0)
     } catch (e) {

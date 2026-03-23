@@ -101,6 +101,9 @@ async def get_news(
 ):
     """Get paginated news items with filtering and search"""
     try:
+        # Debug logging
+        logger.info(f"News API called with params: page={page}, page_size={page_size}, sort_by={sort_by}, q={q}, source_id={source_id}, category={category}")
+        
         if db is None:
             return {"items": [], "total": 0, "page": page, "limit": page_size}
         
