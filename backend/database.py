@@ -1,8 +1,16 @@
 import os
 import logging
+import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from config import get_settings
+
+# Set event loop policy for asyncpg compatibility
+if os.name != 'nt':  # Not Windows
+    try:
+        asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
+    except Exception:
+        pass
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -28,28 +36,44 @@ engine = None
 AsyncSessionLocal = None
 
 def init_engine():
+    """Initialize the database engine if not already done"""
     global engine, AsyncSessionLocal
-    if engine is None:
-        db_url = get_db_url()
-        if not db_url:
-            return
-        try:
-            connect_args = {}
-            if "postgresql" in db_url:
-                # SSL is often required for hosted databases
-                connect_args["ssl"] = "require"
-
-            engine = create_async_engine(
-                db_url,
-                echo=False,
-                pool_pre_ping=True,
-                pool_size=10,
-                max_overflow=20,
-                connect_args=connect_args if "ssl" in connect_args else {}
-            )
-            AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
-        except Exception:
-            pass  # Engine creation failed, will retry later
+    
+    if engine is not None:
+        return engine
+    
+    db_url = get_db_url()
+    if not db_url:
+        logger.warning("No database URL provided")
+        return None
+    
+    try:
+        # Create engine with proper asyncpg settings
+        engine = create_async_engine(
+            db_url,
+            echo=settings.debug,
+            pool_pre_ping=True,
+            pool_recycle=300,
+            connect_args={
+                "command_timeout": 60,
+                "server_settings": {
+                    "application_name": "ai_news_dashboard",
+                    "timezone": "UTC"
+                }
+            }
+        )
+        AsyncSessionLocal = async_sessionmaker(
+            engine, 
+            class_=AsyncSession, 
+            expire_on_commit=False
+        )
+        logger.info("Database engine initialized successfully")
+        return engine
+    except Exception as e:
+        logger.error(f"Failed to initialize database engine: {e}")
+        engine = None
+        AsyncSessionLocal = None
+        return None
 
 
 class Base(DeclarativeBase):
