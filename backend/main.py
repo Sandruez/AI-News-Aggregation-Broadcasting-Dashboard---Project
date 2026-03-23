@@ -8,7 +8,7 @@ import asyncio
 from datetime import datetime
 
 # Database imports
-from database import init_engine, get_db, Base, AsyncSession
+from database import init_engine, get_db, Base, Session
 from models import Source, NewsItem, Favorite, User, BroadcastLog
 from sqlalchemy import select, func, and_, or_
 from sqlalchemy.orm import selectinload
@@ -29,10 +29,8 @@ async def lifespan(app: FastAPI):
     # Initialize database
     if settings.database_url:
         try:
-            from database import init_db, init_engine
-            # Ensure engine is initialized first
-            init_engine()
-            await init_db()
+            from database import init_db
+            init_db()
             logger.info("Database initialized successfully (create_all run)")
             
             # Start news ingestion in background using the correct scheduler
@@ -124,34 +122,21 @@ async def get_news(
         if category:
             query = query.where(NewsItem.category == category)
         
-        # Apply sorting
         if sort_by == 'date':
             query = query.order_by(NewsItem.published_at.desc())
-        elif sort_by == 'relevance':
-            query = query.order_by(NewsItem.relevance_score.desc())
+        elif sort_by == 'impact':
+            query = query.order_by(NewsItem.impact_score.desc())
         
         # Get total count
-        count_query = select(func.count(NewsItem.id))
-        if q:
-            count_query = count_query.where(
-                or_(
-                    NewsItem.title.ilike(f"%{q}%"),
-                    NewsItem.summary.ilike(f"%{q}%")
-                )
-            )
-        if source_id:
-            count_query = count_query.where(NewsItem.source_id == source_id)
-        if category:
-            count_query = count_query.where(NewsItem.category == category)
-        
-        total = await db.scalar(count_query)
+        count_query = select(func.count()).select_from(query.subquery())
+        total_result = db.execute(count_query).scalar()
         
         # Apply pagination
         offset = (page - 1) * page_size
         query = query.offset(offset).limit(page_size)
         
-        result = await db.execute(query)
-        news_items = result.scalars().all()
+        result = db.execute(query)
+        items = result.scalars().all()
         
         return {
             "items": [
@@ -161,32 +146,32 @@ async def get_news(
                     "summary": item.summary,
                     "url": item.url,
                     "source": item.source.name if item.source else "Unknown",
-                    "category": item.category,
                     "published_at": item.published_at.isoformat() if item.published_at else None,
-                    "image_url": item.image_url,
+                    "impact_score": item.impact_score,
+                    "category": item.category,
                     "sentiment": item.sentiment,
-                    "relevance_score": item.relevance_score,
-                    "is_favorite": False
-                } for item in news_items
+                    "relevance_score": item.relevance_score
+                } for item in items
             ],
-            "total": total,
+            "total": total_result,
             "page": page,
-            "limit": page_size
+            "page_size": page_size
         }
-            
+        
     except Exception as e:
         logger.error(f"Error fetching news: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch news")
 
 @app.get("/api/news/{item_id}")
-async def get_news_item(item_id: int, db: AsyncSession = Depends(get_db)):
+def get_news_item(item_id: int, db: Session = Depends(get_db)):
     """Get specific news item"""
     try:
         if db is None:
             raise HTTPException(status_code=404, detail="News item not found")
         
-        result = await db.execute(
-            select(NewsItem).options(selectinload(NewsItem.source)).where(NewsItem.id == item_id)
+        result = db.execute(
+            select(NewsItem).options(selectinload(NewsItem.source))
+            .where(NewsItem.id == item_id)
         )
         item = result.scalar_one_or_none()
         
@@ -199,14 +184,14 @@ async def get_news_item(item_id: int, db: AsyncSession = Depends(get_db)):
             "summary": item.summary,
             "url": item.url,
             "source": item.source.name if item.source else "Unknown",
-            "category": item.category,
             "published_at": item.published_at.isoformat() if item.published_at else None,
-            "image_url": item.image_url,
+            "impact_score": item.impact_score,
+            "category": item.category,
             "sentiment": item.sentiment,
             "relevance_score": item.relevance_score,
-            "is_favorite": False
+            "raw_content": item.raw_content
         }
-            
+        
     except HTTPException:
         raise
     except Exception as e:
@@ -325,13 +310,13 @@ async def remove_favorite(news_item_id: int, db: AsyncSession = Depends(get_db))
 
 # Sources endpoints
 @app.get("/api/sources")
-async def get_sources(db: AsyncSession = Depends(get_db)):
+def get_sources(db: Session = Depends(get_db)):
     """Get news sources"""
     try:
         if db is None:
-            return {"items": []}
+            return {"items": [], "total": 0}
         
-        result = await db.execute(select(Source))
+        result = db.execute(select(Source).order_by(Source.name))
         sources = result.scalars().all()
         
         return {
@@ -341,13 +326,15 @@ async def get_sources(db: AsyncSession = Depends(get_db)):
                     "name": source.name,
                     "url": source.url,
                     "feed_url": source.feed_url,
+                    "type": source.type,
                     "category": source.category,
-                    "is_active": source.active,
-                    "source_type": source.source_type
+                    "active": source.is_active,
+                    "is_active": source.is_active
                 } for source in sources
-            ]
+            ],
+            "total": len(sources)
         }
-            
+        
     except Exception as e:
         logger.error(f"Error fetching sources: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch sources")
