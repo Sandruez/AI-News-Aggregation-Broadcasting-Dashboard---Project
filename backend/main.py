@@ -553,6 +553,35 @@ async def get_recent_activity(db: Session = Depends(get_db)):
         logger.error(f"Error fetching recent activity: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch recent activity")
 
+@app.post("/api/admin/test-fetch")
+async def test_fetch():
+    """Test RSS fetcher directly"""
+    try:
+        from ingestion.fetcher import fetch_rss
+        from ingestion.sources_registry import ALL_SOURCES
+        
+        # Test with a simple source
+        test_source = ALL_SOURCES[0]  # OpenAI Blog
+        logger.info(f"Testing fetch for: {test_source.name}")
+        
+        items = await fetch_rss(test_source, 1, 5)  # source_id=1, max_items=5
+        
+        return {
+            "source": test_source.name,
+            "feed_url": test_source.feed_url,
+            "items_fetched": len(items),
+            "items": [
+                {
+                    "title": item.title,
+                    "url": item.url,
+                    "summary": item.summary[:100] + "..." if item.summary else ""
+                } for item in items
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Test fetch error: {e}")
+        return {"error": str(e), "source": test_source.name}
+
 @app.post("/api/admin/trigger-ingestion")
 async def trigger_ingestion():
     """Manually trigger news ingestion for debugging"""

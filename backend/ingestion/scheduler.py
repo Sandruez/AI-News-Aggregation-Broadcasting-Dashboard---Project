@@ -125,8 +125,12 @@ async def run_ingestion():
                     impact = 5
                     if not dup and item.summary:
                         try:
-                            ai_summary = await groq_service.summarize(item.title, item.summary)
-                            impact = await groq_service.score_impact(item.title, item.summary)
+                            # Check if Groq API key is available
+                            if settings.groq_api_key:
+                                ai_summary = await groq_service.summarize(item.title, item.summary)
+                                impact = await groq_service.score_impact(item.title, item.summary)
+                            else:
+                                logger.warning("Groq API key not configured - skipping AI enrichment for %s", item.title[:50])
                         except Exception as e:
                             logger.warning("AI enrichment failed for %s: %s", item.title[:50], e)
 
