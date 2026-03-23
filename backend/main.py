@@ -677,7 +677,6 @@ async def get_recent_activity(db: Session = Depends(get_db)):
         activities.sort(key=lambda x: x["timestamp"], reverse=True)
         
         return {"activity": activities}
-        }
             
     except Exception as e:
         logger.error(f"Error fetching recent activity: {e}")
