@@ -72,8 +72,8 @@ async def init_db():
     logger.info("Starting database table creation (if not exists)...")
     for attempt in range(max_retries):
         try:
+            # Use sync connection for table creation
             async with engine.begin() as conn:
-                # This is safe to run even if tables exist (it uses IF NOT EXISTS)
                 await conn.run_sync(Base.metadata.create_all)
             logger.info("Database tables verified/created successfully")
             return
