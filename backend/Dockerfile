@@ -17,10 +17,13 @@ RUN pip install --no-cache-dir -r requirements.prod.txt
 # Copy application code
 COPY . .
 
+# Make startup script executable
+RUN chmod +x start.sh
+
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash app \
     && chown -R app:app /app
 USER app
 
-# Production startup command with shell expansion
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port $PORT"]
+# Production startup command
+CMD ["./start.sh"]
