@@ -18,8 +18,5 @@ FROM caddy:alpine
 # Copy built app
 COPY --from=builder /app/dist /srv
 
-# Create Caddyfile for SPA support with dynamic port
-RUN printf ':${PORT:-80} {\n    root * /srv\n    file_server\n    try_files {path} {path}/ /index.html\n    encode zstd gzip\n}\n' > /etc/caddy/Caddyfile
-
-# Start Caddy
-CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
+# Start Caddy using shell form to allow environment variable substitution
+CMD ["sh", "-c", "echo ':\${PORT:-80} {\n    root * /srv\n    file_server\n    try_files {path} {path}/ /index.html\n    encode zstd gzip\n}' > /etc/caddy/Caddyfile && caddy run --config /etc/caddy/Caddyfile"]
