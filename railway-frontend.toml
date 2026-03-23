@@ -8,7 +8,5 @@ VITE_API_URL = "${{services.BACKEND.url}}/api"
 
 [[services]]
 name = "frontend"
-[services.ports]
-port = 80
 [services.healthChecks]
 path = "/"
