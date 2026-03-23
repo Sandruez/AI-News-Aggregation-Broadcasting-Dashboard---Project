@@ -9,9 +9,21 @@ if (!apiUrl) {
 }
 
 const api = axios.create({
-  baseURL: apiUrl, // Fallback to relative path if env var not set
+  baseURL: apiUrl || '/api', // Fallback to relative path if env var not set
   timeout: 15000,
 })
+
+// Add error handling for API calls
+api.interceptors.response.use(
+  response => response,
+  error => {
+    console.error('API Error:', error.message)
+    if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+      console.error('Backend not accessible - check if backend service is running')
+    }
+    return Promise.reject(error)
+  }
+)
 
 // All endpoints already start with /api/...
 // Feed

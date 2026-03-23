@@ -23,10 +23,14 @@ export function useNews() {
     try {
       const clean = Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ''))
       const data = await fetchNews(clean)
-      setItems(data.items)
-      setTotal(data.total)
+      setItems(data.items || [])
+      setTotal(data.total || 0)
     } catch (e) {
-      setError(e.message)
+      console.error('Failed to load news:', e)
+      setError(e.message || 'Failed to load news')
+      // Set empty state to prevent crashes
+      setItems([])
+      setTotal(0)
     } finally {
       setLoading(false)
     }
