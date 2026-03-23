@@ -659,7 +659,7 @@ async def get_recent_activity(db: Session = Depends(get_db)):
         for fav in recent_favorites.scalars().all():
             activities.append({
                 "type": "favorite",
-                "title": f'Favorited: {fav.news_item.title[:50]}...' if len(fav.news_item.title) > 50 else fav.news_item.title',
+                "title": f'Favorited: {fav.news_item.title[:50] if len(fav.news_item.title) > 50 else fav.news_item.title}',
                 "description": f'Added {fav.news_item.title} to favorites',
                 "timestamp": fav.created_at.isoformat() if fav.created_at else None
             })
