@@ -26,5 +26,5 @@ COPY --from=builder /app/dist ./dist
 # Expose port (Railway will provide actual PORT env var)
 EXPOSE 3000
 
-# Start serve with dynamic PORT and bind to all interfaces
-CMD ["sh", "-c", "serve -s dist -l tcp://0.0.0.0:${PORT:-3000}"]
+# Start serve with dynamic PORT and bind to all interfaces (0.0.0.0)
+CMD ["sh", "-c", "serve -s dist -l 0.0.0.0:${PORT:-3000} --no-clipboard"]
