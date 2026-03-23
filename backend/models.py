@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column, Integer, String, Text, Boolean, DateTime,
-    ForeignKey, JSON, func
+    ForeignKey, JSON, func, Float
 )
 from sqlalchemy.orm import relationship
 from database import Base
@@ -41,7 +41,7 @@ class NewsItem(Base):
     category = Column(String(100))
     image_url = Column(String(512))
     sentiment = Column(String(50))
-    relevance_score = Column(func.float(), default=0.0)
+    relevance_score = Column(Float, default=0.0)
     raw_content = Column(Text)
     guid = Column(String(512), unique=True)
 
