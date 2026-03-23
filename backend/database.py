@@ -1,16 +1,8 @@
 import os
 import logging
-import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from config import get_settings
-
-# Set event loop policy for asyncpg compatibility
-if os.name != 'nt':  # Not Windows
-    try:
-        asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
-    except Exception:
-        pass
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -21,13 +13,9 @@ def get_db_url():
         return None
     # Fix for Heroku/Render/Railway postgres:// vs postgresql://
     if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql+asyncpg://", 1)
-    elif url.startswith("postgresql://"):
-        url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    
-    # Ensure asyncpg driver is used
-    if "postgresql" in url and "asyncpg" not in url:
-        url = url.replace("postgresql", "postgresql+asyncpg", 1)
+        url = url.replace("postgres://", "postgresql+psycopg://", 1)
+    elif url.startswith("postgresql://") and "psycopg" not in url:
+        url = url.replace("postgresql", "postgresql+psycopg", 1)
         
     return url
 
@@ -48,18 +36,15 @@ def init_engine():
         return None
     
     try:
-        # Create engine with proper asyncpg settings
+        # Create engine with psycopg settings
         engine = create_async_engine(
             db_url,
             echo=settings.debug,
             pool_pre_ping=True,
             pool_recycle=300,
             connect_args={
-                "command_timeout": 60,
-                "server_settings": {
-                    "application_name": "ai_news_dashboard",
-                    "timezone": "UTC"
-                }
+                "sslmode": "require",
+                "connect_timeout": 60
             }
         )
         AsyncSessionLocal = async_sessionmaker(
@@ -67,7 +52,7 @@ def init_engine():
             class_=AsyncSession, 
             expire_on_commit=False
         )
-        logger.info("Database engine initialized successfully")
+        logger.info("Database engine initialized successfully with psycopg")
         return engine
     except Exception as e:
         logger.error(f"Failed to initialize database engine: {e}")

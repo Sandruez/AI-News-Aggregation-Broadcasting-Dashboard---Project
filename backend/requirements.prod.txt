@@ -7,7 +7,7 @@ pydantic-settings==2.2.1
 
 # Database
 sqlalchemy==2.0.30
-asyncpg==0.29.0
+psycopg[binary]==3.1.19
 alembic==1.13.1
 
 # AI and Services
