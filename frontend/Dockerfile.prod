@@ -23,11 +23,8 @@ RUN npm install -g serve
 # Copy built app
 COPY --from=builder /app/dist ./dist
 
-# Create startup script
-RUN echo '#!/bin/sh\nPORT=${PORT:-3000}\necho "Starting server on port $PORT"\nexec serve -s dist -l tcp://0.0.0.0:$PORT --no-clipboard' > start.sh && chmod +x start.sh
-
 # Expose port
 EXPOSE 3000
 
-# Start serve
-CMD ["./start.sh"]
+# Start serve with shell handling PORT
+CMD ["/bin/sh", "-c", "PORT=${PORT:-3000} && echo \"Starting server on port $PORT\" && exec serve -s dist -l tcp://0.0.0.0:$PORT --no-clipboard"]
