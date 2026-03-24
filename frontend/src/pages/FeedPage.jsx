@@ -12,10 +12,10 @@ export default function FeedPage() {
   return (
     <div className="max-w-4xl mx-auto">
       {/* Page header */}
-      <div className="mb-6">
-        <h1 className="font-display font-800 text-2xl text-white tracking-tight">AI News Feed</h1>
-        <p className="text-sm text-ink-400 mt-1 font-body">
-          Aggregating from 20+ sources, deduplicated and scored by Groq.
+      <div className="mb-4">
+        <h1 className="font-display font-700 text-2xl text-gray-900 tracking-tight">AI News Feed</h1>
+        <p className="text-sm text-gray-600 mt-1">
+          Aggregating from 20+ sources, deduplicated and scored by AI.
         </p>
       </div>
 
