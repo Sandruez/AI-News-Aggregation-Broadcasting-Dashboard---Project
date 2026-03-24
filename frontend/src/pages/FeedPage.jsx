@@ -10,17 +10,17 @@ export default function FeedPage() {
   const [broadcastTarget, setBroadcastTarget] = useState(null)
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-7xl mx-auto px-4 lg:px-6">
       {/* Page header */}
-      <div className="mb-6">
-        <h1 className="font-bold text-2xl text-gray-900">AI News Feed</h1>
-        <p className="text-sm text-gray-600 mt-1">
+      <div className="mb-8">
+        <h1 className="font-bold text-3xl text-gray-900">AI News Feed</h1>
+        <p className="text-gray-600 mt-2">
           Aggregating from 20+ sources, deduplicated and scored by AI.
         </p>
       </div>
 
       {/* Search & filters */}
-      <div className="mb-6">
+      <div className="mb-8">
         <SearchBar
           params={params}
           setParams={setParams}
@@ -54,9 +54,9 @@ export default function FeedPage() {
 
       {/* News grid */}
       {!loading && items.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
           {items.map((item, i) => (
-            <div key={item.id} style={{ animationDelay: `${i * 20}ms` }}>
+            <div key={item.id} style={{ animationDelay: `${i * 50}ms` }} className="w-full">
               <NewsCard
                 item={item}
                 onToggleFavorite={toggleFavorite}

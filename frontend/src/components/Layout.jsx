@@ -174,7 +174,7 @@ export default function Layout({ children }) {
 
       {/* Main Content Area */}
       <main className="lg:ml-72 relative z-30">
-        <div className="w-full px-4 lg:px-6 py-6">
+        <div className="w-full px-4 lg:px-6">
           {children}
         </div>
       </main>
