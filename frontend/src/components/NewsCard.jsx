@@ -31,9 +31,9 @@ export default function NewsCard({ item, onToggleFavorite, onBroadcast }) {
   const catColor = CATEGORY_COLORS[item.source?.category] || 'text-ink-400 bg-ink-700 border-ink-600'
 
   return (
-    <article className="card p-4 animate-slide-up group">
+    <article className="card p-6 animate-slide-up group">
       {/* Header row */}
-      <div className="flex items-start justify-between gap-3 mb-2">
+      <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-2 flex-wrap">
           {item.source && (
             <span className={clsx('tag border', catColor)}>
@@ -46,18 +46,28 @@ export default function NewsCard({ item, onToggleFavorite, onBroadcast }) {
           <ImpactBadge score={item.impact_score} />
         </div>
 
-        <button
-          onClick={() => onToggleFavorite(item)}
-          className={clsx(
-            'shrink-0 p-1.5 rounded-lg transition-all duration-150',
-            item.is_favorited
-              ? 'text-yellow-400 bg-yellow-400/10'
-              : 'text-ink-500 hover:text-yellow-400 hover:bg-yellow-400/10'
-          )}
-          title={item.is_favorited ? 'Remove from favorites' : 'Save to favorites'}
-        >
-          <Star size={15} fill={item.is_favorited ? 'currentColor' : 'none'} />
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => onToggleFavorite(item)}
+            className={clsx(
+              'p-2 rounded-lg transition-all duration-150',
+              item.is_favorited
+                ? 'text-yellow-400 bg-yellow-400/10'
+                : 'text-ink-500 hover:text-yellow-400 hover:bg-yellow-400/10'
+            )}
+            title={item.is_favorited ? 'Remove from favorites' : 'Save to favorites'}
+          >
+            <Star size={16} fill={item.is_favorited ? 'currentColor' : 'none'} />
+          </button>
+          
+          <button
+            onClick={() => onBroadcast(item)}
+            className="p-2 rounded-lg text-ink-500 hover:text-white hover:bg-ink-600 transition-all duration-150"
+            title="Broadcast article"
+          >
+            <ExternalLink size={16} />
+          </button>
+        </div>
       </div>
 
       {/* Title */}

@@ -81,6 +81,11 @@ export default function Layout({ children }) {
               <span className="font-bold text-lg text-gray-900">Pulse</span>
             </div>
           </div>
+          
+          {/* Mobile Header Right Side - Add future elements here */}
+          <div className="flex items-center gap-2">
+            {/* Placeholder for future header elements */}
+          </div>
         </div>
       </header>
 
@@ -169,7 +174,7 @@ export default function Layout({ children }) {
 
       {/* Main Content Area */}
       <main className="lg:ml-72 min-h-screen">
-        <div className="w-full">
+        <div className="w-full px-4 py-6 lg:px-8 lg:py-8">
           {children}
         </div>
       </main>
