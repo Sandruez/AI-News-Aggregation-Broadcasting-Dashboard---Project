@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { fetchAdminOverview, fetchNewsTrend, fetchSourceDistribution, fetchCategoryBreakdown } from '../utils/api'
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { TrendingUp, Users, Newspaper, Activity, Database, Clock, AlertTriangle, CheckCircle, Zap, Globe } from 'lucide-react'
-import { Select } from 'react-tailwindcss'
+import { TrendingUp, Users, Newspaper, Activity, Database, Clock, AlertTriangle, CheckCircle, Zap, Globe, BarChart3, RefreshCw, Star, Settings } from 'lucide-react'
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899']
 
