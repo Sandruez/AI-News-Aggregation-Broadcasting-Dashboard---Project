@@ -14,7 +14,7 @@ export default function FavoritesPage() {
   const [broadcastTarget, setBroadcastTarget] = useState(null)
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
+    <div className="max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="font-display font-800 text-2xl text-white tracking-tight">Favorites</h1>
         <p className="text-sm text-ink-400 mt-1 font-body">

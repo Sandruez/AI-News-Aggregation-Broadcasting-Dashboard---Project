@@ -10,7 +10,7 @@ export default function FeedPage() {
   const [broadcastTarget, setBroadcastTarget] = useState(null)
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
+    <div className="max-w-4xl mx-auto">
       {/* Page header */}
       <div className="mb-6">
         <h1 className="font-display font-800 text-2xl text-white tracking-tight">AI News Feed</h1>
