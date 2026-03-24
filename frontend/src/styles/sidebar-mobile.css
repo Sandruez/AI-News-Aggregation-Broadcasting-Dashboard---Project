@@ -1,0 +1,219 @@
+/* Enhanced Sidebar Mobile Styles */
+
+/* Custom animations for smoother sidebar transitions */
+.sidebar-slide-enter {
+  transform: translateX(-100%);
+}
+
+.sidebar-slide-enter-active {
+  transform: translateX(0);
+  transition: transform 300ms ease-in-out;
+}
+
+.sidebar-slide-exit {
+  transform: translateX(0);
+}
+
+.sidebar-slide-exit-active {
+  transform: translateX(-100%);
+  transition: transform 300ms ease-in-out;
+}
+
+/* Overlay animations */
+.overlay-fade-enter {
+  opacity: 0;
+}
+
+.overlay-fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms ease-in-out;
+}
+
+.overlay-fade-exit {
+  opacity: 1;
+}
+
+.overlay-fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
+
+/* Hamburger menu animation */
+.hamburger-icon {
+  transition: all 0.3s ease;
+}
+
+.hamburger-icon:hover {
+  transform: scale(1.05);
+}
+
+.hamburger-icon:active {
+  transform: scale(0.95);
+}
+
+/* Close button animation */
+.close-icon {
+  transition: all 0.3s ease;
+}
+
+.close-icon:hover {
+  transform: rotate(90deg);
+}
+
+.close-icon:active {
+  transform: rotate(90deg) scale(0.95);
+}
+
+/* Navigation link animations */
+.nav-link {
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(147, 51, 234, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.nav-link:hover::before {
+  left: 100%;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 1023px) {
+  /* Prevent horizontal scroll when sidebar is open */
+  body.sidebar-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+  }
+  
+  /* Better touch targets */
+  .sidebar-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Improved focus states for mobile */
+  .sidebar-focus:focus {
+    outline: 2px solid #9333ea;
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+}
+
+/* Desktop sidebar improvements */
+@media (min-width: 1024px) {
+  .sidebar-desktop {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  
+  .sidebar-desktop::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .sidebar-desktop::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+  
+  .sidebar-desktop::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  
+  .sidebar-desktop::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .sidebar-overlay {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+  
+  .sidebar-background {
+    border: 2px solid #000000;
+  }
+  
+  .nav-link {
+    border: 1px solid transparent;
+  }
+  
+  .nav-link:hover,
+  .nav-link:focus {
+    border-color: #000000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-slide-enter-active,
+  .sidebar-slide-exit-active,
+  .overlay-fade-enter-active,
+  .overlay-fade-exit-active {
+    transition: none;
+  }
+  
+  .hamburger-icon,
+  .close-icon {
+    transition: none;
+  }
+  
+  .nav-link::before {
+    display: none;
+  }
+}
+
+/* Dark mode support for sidebar */
+@media (prefers-color-scheme: dark) {
+  .sidebar-background {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+  
+  .sidebar-text {
+    color: #f9fafb;
+  }
+  
+  .sidebar-text-secondary {
+    color: #9ca3af;
+  }
+  
+  .nav-link {
+    color: #d1d5db;
+  }
+  
+  .nav-link:hover {
+    color: #f9fafb;
+    background-color: #374151;
+  }
+  
+  .nav-link.active {
+    color: #c084fc;
+    background-color: #581c87;
+    border-color: #7c3aed;
+  }
+}
+
+/* Print styles - hide sidebar */
+@media print {
+  .sidebar-background,
+  .sidebar-overlay,
+  .mobile-header {
+    display: none !important;
+  }
+  
+  .main-content {
+    margin-left: 0 !important;
+  }
+}
